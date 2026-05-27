@@ -1,0 +1,39 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header a {
+  color: black;
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+.header a.logo {
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.header-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  gap: 20px;
+}
+
+.header a.breadcrumb {
+  text-decoration: none;
+}
+
+.header a:hover {
+  opacity: 0.6;
+}
