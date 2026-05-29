@@ -37,3 +37,14 @@
 .header a:hover {
   opacity: 0.6;
 }
+
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.box {
+  background-color: #f0f0f0;
+  padding: 20px;
+  width: 50%;
+}
