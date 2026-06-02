@@ -1,6 +1,7 @@
 body {
   background-color: #f0f0f0;
   margin: 0;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .card {
@@ -62,8 +63,9 @@ body {
 }
 
 .breadcrumb-sub {
+  display: block;
   font-size: 13px;
-  color: #888;
+  color: #5B9BD5;
 }
 
 .main-right {
@@ -89,4 +91,17 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.box-left, .box-center, .box-right {
+  background-color: #fff;
+  width: 500px;
+  margin: 40px 20px 20px 20px;
+  padding: 50px;
 }
