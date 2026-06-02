@@ -1,3 +1,13 @@
+body {
+  background-color: #f0f0f0;
+  margin: 0;
+}
+
+.card {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -38,13 +48,45 @@
   opacity: 0.6;
 }
 
-.container {
+.main {
   display: flex;
-  gap: 20px;
+  justify-content: space-between;
+  padding: 40px 20px;
+  gap: 40px;
 }
 
-.box {
-  background-color: #f0f0f0;
-  padding: 20px;
-  width: 50%;
+.main-left h1 {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 8px 0 0 0;
+}
+
+.breadcrumb-sub {
+  font-size: 13px;
+  color: #888;
+}
+
+.main-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 320px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+}
+
+.stat-label {
+  color: #888;
+}
+
+.stat-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
