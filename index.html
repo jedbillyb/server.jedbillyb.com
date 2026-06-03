@@ -2,13 +2,15 @@
 <html>
 
 <head>
+    <title>server.jedbillyb.com</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
     <div class="card">
     <div class="header">
-        <a class="breadcrumb", href="/index.html">server.jedbillyb.com</a>
+        <a class="breadcrumb", href="/">server.jedbillyb.com</a>
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
@@ -27,7 +29,7 @@
     <div class="main-right">
         <div class="stat-row">
             <span class="stat-label">status</span>
-            <span class="stat-value"></span>--</span>
+            <span class="stat-value">--</span>
         </div>
         <div class="stat-row">
             <span class="stat-label">uptime</span>
@@ -45,17 +47,77 @@
 </div>
 </div>
 
+<span class="breadcrumb-sub-top">// projects</span>
 <div class="container">
-    <div class="box-left">nz-vehicle-finder</div>
-    <div class="box-center">jedbillyb.com</div>
-    <div class="box-right">openclaw</div>
+
+    <a href="/nz-vehicle-finder.html" class="box">
+        <div class="box-top">
+            <div class="box-title">nz-vehicle-finder</div>
+            <div class="box-desc">search tool for the nz motor vehicle register.</div>
+        </div>
+        <div class="box-footer">
+            <span class="box-tags">react · sqlite · express</span>
+            <span class="box-status"></span>
+        </div>
+    </a>
+
+    <a href="/jedbillyb-com.html" class="box">
+        <div class="box-top">
+            <div class="box-title">jedbillyb.com</div>
+            <div class="box-desc">personal site and portfolio. self-hosted on nginx.</div>
+        </div>
+        <div class="box-footer">
+            <span class="box-tags">html · scss · nginx</span>
+            <span class="box-status"></span>
+        </div>
+    </a>
+
+    <a href="/openclaw.html" class="box">
+        <div class="box-top">
+            <div class="box-title">openclaw</div>
+            <div class="box-desc">open-source personal ai agent, telegram + discord intergration.</div>
+        </div>
+        <div class="box-footer">
+            <span class="box-tags">python · couchdb · systemd</span>
+            <span class="box-status"></span>
+        </div>
+    </a>
+
+    <a href="/posthog-webhook.html" class="box">
+        <div class="box-top">
+            <div class="box-title">posthog-webhook</div>
+            <div class="box-desc">forwards posthog analytics events to telegram.</div>
+        </div>
+        <div class="box-footer">
+            <span class="box-tags">python · fastapi · systemd</span>
+            <span class="box-status"></span>
+        </div>
+    </a>
+
+    <a href="/minecraft.html" class="box">
+        <div class="box-top">
+            <div class="box-title">minecraft</div>
+            <div class="box-desc">personal minecraft server, currently off.</div>
+        </div>
+        <div class="box-footer">
+            <span class="box-tags">java · systemd</span>
+            <span class="box-status"></span>
+        </div>
+    </a>
+
+    <a href="/manifest.html" class="box box-manifest">
+        <div class="box-top">
+            <div class="box-title">/manifest</div>
+            <div class="box-desc">live system stats, services, top processes, system location and combined logs</div>
+        </div>
+        <div class="box-footer">
+            <span class="box-tags">cpu · ram · uptime · top procs</span>
+        </div>
+    </a>
+
 </div>
 
-<div class="container">
-    <div class="box-left">posthog-webhook</div>
-    <div class="box-center">minecraft</div>
-    <div class="box-right">/manifest</div>
-</div>
+<footer class="footer">jed blenkhorn · 2026</footer>
 
 </body>
 
