@@ -50,7 +50,7 @@
 <span class="breadcrumb-sub-top">// projects</span>
 <div class="container">
 
-    <a href="/nz-vehicle-finder.html" class="box">
+    <a href="/nz-vehicle-finder.html" class="box" data-slug="vehicle-api">
         <div class="box-top">
             <div class="box-title">nz-vehicle-finder</div>
             <div class="box-desc">search tool for the nz motor vehicle register.</div>
@@ -72,7 +72,7 @@
         </div>
     </a>
 
-    <a href="/openclaw.html" class="box">
+    <a href="/openclaw.html" class="box" data-slug="openclaw">
         <div class="box-top">
             <div class="box-title">openclaw</div>
             <div class="box-desc">open-source personal ai agent, telegram + discord intergration.</div>
@@ -83,7 +83,7 @@
         </div>
     </a>
 
-    <a href="/posthog-webhook.html" class="box">
+    <a href="/posthog-webhook.html" class="box" data-slug="posthog-webhook">
         <div class="box-top">
             <div class="box-title">posthog-webhook</div>
             <div class="box-desc">forwards posthog analytics events to telegram.</div>
@@ -118,6 +118,43 @@
 </div>
 
 <footer class="footer">jed blenkhorn · 2026</footer>
+
+<script>
+  function fmtUptime(s) {
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
+  }
+
+  async function loadStatus() {
+    try {
+      const r = await fetch('/api/status');
+      const d = await r.json();
+      document.querySelector('.stat-row:nth-child(1) .stat-value').textContent = d.ok ? 'online' : 'degraded';
+      document.querySelector('.stat-row:nth-child(2) .stat-value').textContent = fmtUptime(d.uptime);
+      document.querySelector('.stat-row:nth-child(3) .stat-value').textContent =
+        d.failedServices === 0 ? 'all running' : `${d.failedServices} failed`;
+      document.querySelector('.stat-row:nth-child(4) .stat-value').textContent =
+        d.failedServices === 0 ? 'none' : 'now';
+    } catch {}
+  }
+
+  async function loadVitals(box) {
+    const slug = box.dataset.slug;
+    try {
+      const r = await fetch(`/api/projects/${slug}/vitals`);
+      const d = await r.json();
+      const up = d.serviceStatus === 'active' || d.pm2Status === 'online' || d.portListening === true;
+      const el = box.querySelector('.box-status');
+      el.textContent = up ? 'running' : 'stopped';
+      el.classList.add(up ? 'running' : 'stopped');
+    } catch {}
+  }
+
+  loadStatus();
+  document.querySelectorAll('[data-slug]').forEach(loadVitals);
+</script>
 
 </body>
 
