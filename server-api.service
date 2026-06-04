@@ -1,0 +1,14 @@
+[Unit]
+Description=server.jedbillyb.com API Server
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/ubuntu/server-api
+ExecStart=/usr/local/bin/node server.js
+EnvironmentFile=/home/ubuntu/server-api/.env
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
