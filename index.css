@@ -244,3 +244,33 @@ body {
   font-size: 13px;
   color: #888;
 }
+
+@media (max-width: 640px) {
+  .main {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .main-right {
+    min-width: unset;
+  }
+
+  .main-left h1 {
+    font-size: 24px;
+  }
+
+  .container {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .log-row {
+    grid-template-columns: 44px 1fr;
+  }
+
+  .log-service {
+    display: none;
+  }
+}
