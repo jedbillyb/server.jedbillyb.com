@@ -42,10 +42,15 @@ body {
 .header-right {
   display: flex;
   gap: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  color: 7A8593;
 }
 
 .header a.breadcrumb {
   text-decoration: none;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: bold;
+  color: 1A2332;
 }
 
 .header a:hover {
@@ -202,6 +207,7 @@ body {
 }
 
 .log-row {
+  flex: 1;
   display: grid;
   grid-template-columns: 48px 160px 1fr;
   align-items: center;
