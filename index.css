@@ -65,19 +65,28 @@ body {
   margin: 8px 0 0 0;
 }
 
-.breadcrumb-sub {
+.breadcrumb-sub-home {
   display: block;
   font-size: 13px;
   color: #5B9BD5;
 }
 
-.breadcrumb-sub-top {
+.breadcrumb-sub-projects {
   display: block;
   font-size: 13px;
   color: #7A8593;
   margin-top: 20px;
   margin-left: 20px;
   margin-bottom: -20px;
+}
+
+.breadcrumb-sub-recent-logs {
+  display: block;
+  font-size: 13px;
+  color: #7A8593;
+  margin-top: 10px;
+  margin-left: 20px;
+  margin-bottom: 20px;
 }
 
 .main-right {
@@ -180,6 +189,47 @@ body {
 .box-manifest .box-tags {
   color: #5B9BD5;
 }
+
+.box-recent-logs {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 16px 20px;
+  margin: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 220px;
+}
+
+.log-row {
+  display: grid;
+  grid-template-columns: 48px 160px 1fr;
+  align-items: center;
+  font-size: 13px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.log-row:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: #aaa;
+}
+
+.log-service {
+  font-weight: 500;
+}
+
+.log-msg {
+  color: #bbb;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
 
 .footer {
   margin-top: auto;

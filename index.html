@@ -20,7 +20,7 @@
 
 <div class="main">
     <div class="main-left">
-        <span class="breadcrumb-sub">// home</span>
+        <span class="breadcrumb-sub-home">// home</span>
         <h1>server.jedbillyb.com</h1>
         <span class="breadcrumb-sub">--------------------------------------------------------------------------------------------------</span>
         <span class="breadcrumb-sub">--------------------------------------------------------------------------------------------------</span>
@@ -47,7 +47,7 @@
 </div>
 </div>
 
-<span class="breadcrumb-sub-top">// projects</span>
+<span class="breadcrumb-sub-projects">// projects</span>
 <div class="container">
 
     <a href="/nz-vehicle-finder.html" class="box" data-slug="vehicle-api">
@@ -117,6 +117,10 @@
 
 </div>
 
+<span class="breadcrumb-sub-recent-logs">// recent logs</span>
+
+<div class="box-recent-logs" id="recent-logs"></div>
+
 <footer class="footer">jed blenkhorn · 2026</footer>
 
 <script>
@@ -152,8 +156,38 @@
     } catch {}
   }
 
+  const SERVICE_COLORS = {
+    'profile-server': '#5B9BD5',
+    'docker': '#e8a838',
+  };
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  async function loadActivity() {
+    try {
+      const r = await fetch('/api/activity?limit=5');
+      const entries = await r.json();
+      const container = document.getElementById('recent-logs');
+      container.innerHTML = entries.map(e => {
+        const unit = esc((e._SYSTEMD_UNIT || e.SYSLOG_IDENTIFIER || 'unknown').replace('.service', ''));
+        const msg = esc(e.MESSAGE || '');
+        const ts = e.__REALTIME_TIMESTAMP ? new Date(Number(e.__REALTIME_TIMESTAMP) / 1000) : new Date();
+        const time = ts.toTimeString().slice(0, 5);
+        const color = SERVICE_COLORS[unit] || '#4aab8a';
+        return `<div class="log-row">
+          <span class="log-time">${time}</span>
+          <span class="log-service" style="color:${color}">${unit}</span>
+          <span class="log-msg">${msg}</span>
+        </div>`;
+      }).join('');
+    } catch {}
+  }
+
   loadStatus();
   document.querySelectorAll('[data-slug]').forEach(loadVitals);
+  loadActivity();
 </script>
 
 </body>
