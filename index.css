@@ -207,7 +207,6 @@ body {
 }
 
 .log-row {
-  flex: 1;
   display: grid;
   grid-template-columns: 48px 160px 1fr;
   align-items: center;

@@ -168,7 +168,7 @@
 
   async function loadActivity() {
     try {
-      const r = await fetch('/api/activity?limit=5');
+      const r = await fetch('/api/activity?limit=7');
       const entries = await r.json();
       const container = document.getElementById('recent-logs');
       container.innerHTML = entries.map(e => {
