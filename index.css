@@ -203,7 +203,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  height: 220px;
 }
 
 .log-row {
