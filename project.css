@@ -50,3 +50,250 @@ body {
   font-size: 13px;
   color: #888;
 }
+
+.breadcrumb-sub-home {
+  display: block;
+  font-size: 13px;
+  color: #5B9BD5;
+}
+
+/* ── project page ── */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+.footer-back {
+  color: #888;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.footer-back:hover {
+  opacity: 0.7;
+}
+
+.project-page {
+  flex: 1;
+  padding: 24px 20px;
+}
+
+.project-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.project-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.project-title {
+  font-size: 30px;
+  font-weight: 700;
+  font-family: inherit;
+  margin: 0 0 4px 0;
+}
+
+.project-subtitle {
+  font-size: 13px;
+  color: #999;
+}
+
+.project-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #22c55e;
+  border: 1px solid #22c55e;
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.project-links {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.project-link {
+  font-size: 13px;
+  text-decoration: none;
+  color: #333;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  padding: 6px 12px;
+  background: #fff;
+}
+
+.project-link:hover {
+  background: #f5f5f5;
+}
+
+.link-tag {
+  color: #888;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.project-col-left,
+.project-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── cards ── */
+
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.card-header {
+  font-size: 12px;
+  color: #999;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.description-body {
+  height: 130px;
+}
+
+/* ── stack table ── */
+
+.stack-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.stack-table tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stack-table tr:last-child {
+  border-bottom: none;
+}
+
+.stack-key {
+  color: #999;
+  padding: 9px 16px;
+  width: 110px;
+  font-size: 12px;
+  background: #fafafa;
+  vertical-align: middle;
+}
+
+.stack-val {
+  padding: 9px 16px;
+  color: #222;
+  vertical-align: middle;
+}
+
+/* ── vitals ── */
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 16px;
+  gap: 16px;
+}
+
+.vital-label {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 3px;
+}
+
+.vital-value {
+  font-size: 22px;
+  color: #222;
+}
+
+.vital-green {
+  color: #22c55e;
+}
+
+/* ── log ── */
+
+.log-body {
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.log-line {
+  font-size: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.log-time {
+  color: #999;
+  min-width: 32px;
+}
+
+.log-text {
+  color: #bbb;
+}
+
+/* ── other projects ── */
+
+.other-projects {
+  padding: 12px 16px;
+  display: flex;
+  gap: 20px;
+}
+
+.other-project-link {
+  font-size: 13px;
+  color: #5B9BD5;
+  text-decoration: none;
+}
+
+.other-project-link:hover {
+  opacity: 0.7;
+}
+
+/* ── mobile ── */
+
+@media (max-width: 700px) {
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-top {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .project-links {
+    flex-direction: column;
+  }
+}
