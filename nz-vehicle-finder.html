@@ -30,7 +30,7 @@
             </div>
             <div class="project-status">
                 <span class="status-dot"></span>
-                running · systemd · 14d 02:11
+                running · pm2 · <span id="uptime">—</span>
             </div>
         </div>
 
@@ -86,33 +86,28 @@
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
                         <div class="vital">
-                            <div class="vital-label">cpu</div>
-                            <div class="vital-value vital-green">0.4%</div>
+                            <div class="vital-label">load</div>
+                            <div class="vital-value vital-green" data-vital="load">—</div>
                         </div>
                         <div class="vital">
                             <div class="vital-label">mem</div>
-                            <div class="vital-value vital-green">128 M</div>
+                            <div class="vital-value vital-green" data-vital="mem">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label">requests</div>
-                            <div class="vital-value">218/h</div>
+                            <div class="vital-label">pm2</div>
+                            <div class="vital-value" data-vital="pm2">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label">db size</div>
-                            <div class="vital-value">412 M</div>
+                            <div class="vital-label">port</div>
+                            <div class="vital-value" data-vital="port">—</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">// recent log</div>
-                    <div class="log-body">
-                        <div class="log-line"><span class="log-time">03:14</span><span class="log-text">--------------------</span></div>
-                        <div class="log-line"><span class="log-time">03:13</span><span class="log-text">------------</span></div>
-                        <div class="log-line"><span class="log-time">03:13</span><span class="log-text">-----------------------</span></div>
-                        <div class="log-line"><span class="log-time">03:11</span><span class="log-text">------</span></div>
-                        <div class="log-line"><span class="log-time">03:10</span><span class="log-text">---------------------------</span></div>
-                        <div class="log-line"><span class="log-time">03:08</span><span class="log-text">------------------</span></div>
+                    <div class="log-body" id="log-body">
+                        <div class="log-line"><span class="log-time">—</span><span class="log-text">loading…</span></div>
                     </div>
                 </div>
 
@@ -131,6 +126,71 @@
         <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
         <span>jed blenkhorn · 2026</span>
     </footer>
+
+<script>
+const API = 'https://server.jedbillyb.com/api';
+
+function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatUptime(seconds) {
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${d}d ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function tsToTime(usec) {
+    return new Date(Number(usec) / 1000).toLocaleTimeString('en-NZ', {
+        hour: '2-digit', minute: '2-digit', hour12: false
+    });
+}
+
+async function init() {
+    const [sysRes, vitalsRes, logsRes] = await Promise.all([
+        fetch(`${API}/system`).catch(() => null),
+        fetch(`${API}/projects/vehicle-api/vitals`).catch(() => null),
+        fetch(`${API}/projects/vehicle-api/logs?limit=6`).catch(() => null),
+    ]);
+
+    if (sysRes?.ok) {
+        const sys = await sysRes.json();
+        const load = sys.cpu?.load?.[0];
+        if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
+        const memPct = sys.memory?.usedPercent;
+        if (memPct != null) document.querySelector('[data-vital="mem"]').textContent = memPct + '%';
+    }
+
+    if (vitalsRes?.ok) {
+        const v = await vitalsRes.json();
+        const pm2El = document.querySelector('[data-vital="pm2"]');
+        const portEl = document.querySelector('[data-vital="port"]');
+        const status = v.pm2Status ?? v.serviceStatus ?? '—';
+        pm2El.textContent = status;
+        if (status === 'online' || status === 'active') pm2El.classList.add('vital-green');
+        if (v.portListening != null) {
+            portEl.textContent = v.portListening ? 'open' : 'closed';
+            if (v.portListening) portEl.classList.add('vital-green');
+        }
+        if (v.pm2Uptime) document.getElementById('uptime').textContent = formatUptime(v.pm2Uptime / 1000);
+    }
+
+    if (logsRes?.ok) {
+        const logs = await logsRes.json();
+        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
+        const logBody = document.getElementById('log-body');
+        if (entries.length) {
+            logBody.innerHTML = entries.map(e => {
+                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+                return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
+            }).join('');
+        }
+    }
+}
+
+init();
+</script>
 </body>
 
 </html>

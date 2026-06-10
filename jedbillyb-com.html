@@ -2,6 +2,9 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <title>jedbillyb.com · server.jedbillyb.com</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="project.css">
 </head>
 
@@ -14,9 +17,177 @@
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
-            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com -></a>
+            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com ↗</a>
         </div>
     </div>
+
+    <main class="project-page">
+        <div class="project-top">
+            <div class="project-meta">
+                <div class="project-label">// project</div>
+                <h1 class="project-title">jedbillyb.com</h1>
+                <div class="project-subtitle">this site's parent</div>
+            </div>
+            <div class="project-status">
+                <span class="status-dot"></span>
+                running · nginx · <span id="uptime">—</span>
+            </div>
+        </div>
+
+        <div class="project-links">
+            <a href="https://jedbillyb.com" target="_blank" class="project-link">
+                jedbillyb.com ↗ <span class="link-tag">live</span>
+            </a>
+            <a href="https://github.com/jedbillyb/jedbillyb.com" target="_blank" class="project-link">
+                github ↗ <span class="link-tag">/jedbillyb/jedbillyb.com</span>
+            </a>
+        </div>
+
+        <div class="project-grid">
+            <div class="project-col-left">
+                <div class="card">
+                    <div class="card-header">// description</div>
+                    <div class="description-body"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// stack</div>
+                    <table class="stack-table">
+                        <tr>
+                            <td class="stack-key">markup</td>
+                            <td class="stack-val">plain html</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">styling</td>
+                            <td class="stack-val">scss</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">scripts</td>
+                            <td class="stack-val">typescript (minimal)</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">server</td>
+                            <td class="stack-val">nginx (static files)</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">was</td>
+                            <td class="stack-val">cloudflare pages</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">now</td>
+                            <td class="stack-val">self-hosted on this box</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="project-col-right">
+                <div class="card">
+                    <div class="card-header">// vitals</div>
+                    <div class="vitals-grid">
+                        <div class="vital">
+                            <div class="vital-label">load</div>
+                            <div class="vital-value vital-green" data-vital="load">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">mem</div>
+                            <div class="vital-value vital-green" data-vital="mem">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">disk</div>
+                            <div class="vital-value" data-vital="disk">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">nginx</div>
+                            <div class="vital-value" data-vital="nginx">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// recent log</div>
+                    <div class="log-body" id="log-body">
+                        <div class="log-line"><span class="log-time">—</span><span class="log-text">loading…</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// other projects</div>
+                    <div class="other-projects">
+                        <a href="/nz-vehicle-finder.html" class="other-project-link">→ nz-vehicle-finder</a>
+                        <a href="/openclaw.html" class="other-project-link">→ openclaw</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
+        <span>jed blenkhorn · 2026</span>
+    </footer>
+
+<script>
+const API = 'https://server.jedbillyb.com/api';
+
+function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatUptime(seconds) {
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${d}d ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function tsToTime(usec) {
+    return new Date(Number(usec) / 1000).toLocaleTimeString('en-NZ', {
+        hour: '2-digit', minute: '2-digit', hour12: false
+    });
+}
+
+async function init() {
+    const [sysRes, nginxRes, logsRes] = await Promise.all([
+        fetch(`${API}/system`).catch(() => null),
+        fetch(`${API}/services/nginx.service`).catch(() => null),
+        fetch(`${API}/logs?unit=nginx&limit=5`).catch(() => null),
+    ]);
+
+    if (sysRes?.ok) {
+        const sys = await sysRes.json();
+        const load = sys.cpu?.load?.[0];
+        if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
+        const memPct = sys.memory?.usedPercent;
+        if (memPct != null) document.querySelector('[data-vital="mem"]').textContent = memPct + '%';
+        const disk = sys.disk?.usedPercent;
+        if (disk != null) document.querySelector('[data-vital="disk"]').textContent = disk + '%';
+        if (sys.uptime) document.getElementById('uptime').textContent = formatUptime(sys.uptime);
+    }
+
+    if (nginxRes?.ok) {
+        const nginx = await nginxRes.json();
+        const sub = nginx.SubState ?? nginx.sub ?? '—';
+        const el = document.querySelector('[data-vital="nginx"]');
+        el.textContent = sub;
+        if (sub === 'running') el.classList.add('vital-green');
+    }
+
+    if (logsRes?.ok) {
+        const logs = await logsRes.json();
+        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
+        const logBody = document.getElementById('log-body');
+        if (entries.length) {
+            logBody.innerHTML = entries.map(e => {
+                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+                return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
+            }).join('');
+        }
+    }
+}
+
+init();
+</script>
 </body>
 
 </html>
