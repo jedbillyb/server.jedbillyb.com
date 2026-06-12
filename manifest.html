@@ -117,15 +117,12 @@
 <script>
 const API = 'https://server.jedbillyb.com/api';
 
-function fmtMem(bytes) {
-    return bytes >= 1e9 ? (bytes/1e9).toFixed(1)+' G' : Math.round(bytes/1e6)+' M';
-}
-
 async function init() {
-    const [sysRes, servicesRes, dockerRes] = await Promise.all([
+    const [sysRes, servicesRes, procsRes, dockerRes] = await Promise.all([
         fetch(`${API}/system`).catch(()=>null),
         fetch(`${API}/services`).catch(()=>null),
-        fetch(`${API}/docker`).catch(()=>null),
+        fetch(`${API}/processes`).catch(()=>null),
+        fetch(`${API}/docker/containers`).catch(()=>null),
     ]);
 
     if (sysRes?.ok) {
@@ -138,8 +135,7 @@ async function init() {
             document.getElementById('stat-cpu').textContent = pct.toFixed(0) + '%';
             document.getElementById('bar-cpu').style.width = pct.toFixed(0) + '%';
         }
-        const freq = s.cpu?.freq_ghz;
-        document.getElementById('cpu-sub').textContent = [cores && s.cpu?.threads ? `${cores}c/${s.cpu.threads}t` : null, freq ? freq+' GHz' : null].filter(Boolean).join(' · ') || '—';
+        document.getElementById('cpu-sub').textContent = cores ? `${cores} cores` : '—';
 
         const used = s.memory?.used, total = s.memory?.total;
         if (used && total) {
@@ -156,46 +152,47 @@ async function init() {
             document.getElementById('uptime-sub').textContent = 'since ' + new Date(Date.now() - s.uptime*1000).toISOString().slice(0,10);
         }
 
-        if (s.os?.name) { document.getElementById('stat-os').textContent = s.os.name; document.getElementById('map-os').textContent = s.os.name.toLowerCase(); }
-        if (s.os?.kernel || s.os?.arch) document.getElementById('os-sub').textContent = [s.os.kernel, s.os.arch].filter(Boolean).join(' · ');
+        if (s.platform) { document.getElementById('stat-os').textContent = s.platform; document.getElementById('map-os').textContent = s.platform; }
+        if (s.arch) document.getElementById('os-sub').textContent = s.arch;
         if (s.cpu?.load) document.getElementById('banner-load').textContent = s.cpu.load.map(l=>l.toFixed(2)).join(' ');
-        if (s.ipv4) document.getElementById('map-ipv4').textContent = s.ipv4;
-
-        const procs = s.processes ?? [];
-        document.getElementById('procs-body').innerHTML = procs.slice(0,8).map(p => {
-            const cpu = p.cpu != null ? p.cpu.toFixed(1)+'%' : '—';
-            const cls = p.cpu > 5 ? 'green' : '';
-            return `<tr><td>${esc(p.name)}</td><td class="${cls}">${cpu}</td><td class="muted">${fmtMem(p.mem)}</td></tr>`;
-        }).join('') || '<tr><td colspan="3">no data</td></tr>';
     }
 
     if (servicesRes?.ok) {
         const list = await servicesRes.json().then(d => Array.isArray(d) ? d : d.services ?? []);
-        const running = list.filter(s => s.state === 'running' || s.active === 'active').length;
+        const running = list.filter(s => s.active === 'active').length;
         const stopped = list.length - running;
         document.getElementById('banner-sub').textContent = `${running} services running · ${stopped} stopped · last incident 12d ago`;
-        if (stopped > 0) { document.getElementById('banner-dot').className = 'banner-dot warn'; document.getElementById('status-banner')?.classList.add('warn'); }
+        if (stopped > 0) { document.getElementById('banner-dot').className = 'banner-dot warn'; }
 
         document.getElementById('services-body').innerHTML = list.map(s => {
-            const up = s.state === 'running' || s.active === 'active';
-            const uptime = s.uptime ?? (up ? '—' : `since ${s.since ?? '—'}`);
+            const up = s.active === 'active';
             return `<tr>
-                <td><span class="dot ${up?'green':'grey'}"></span>${esc(s.name)}</td>
-                <td class="${up?'green':'muted'}">${up?'running':'stopped'}</td>
-                <td class="muted">${esc(uptime)}</td>
+                <td><span class="dot ${up?'green':'grey'}"></span>${esc(s.unit)}</td>
+                <td class="${up?'green':'muted'}">${esc(s.sub)}</td>
+                <td class="muted">${esc(s.description ?? '—')}</td>
             </tr>`;
+        }).join('') || '<tr><td colspan="3">no data</td></tr>';
+    }
+
+    if (procsRes?.ok) {
+        const procs = await procsRes.json();
+        document.getElementById('procs-body').innerHTML = procs.slice(0,8).map(p => {
+            const name = p.command?.split(/[\s/]/).filter(Boolean).pop() ?? '—';
+            const cpu = p.cpu != null ? p.cpu.toFixed(1)+'%' : '—';
+            const cls = p.cpu > 5 ? 'green' : '';
+            return `<tr><td>${esc(name)}</td><td class="${cls}">${cpu}</td><td class="muted">${p.mem != null ? p.mem.toFixed(1)+'%' : '—'}</td></tr>`;
         }).join('') || '<tr><td colspan="3">no data</td></tr>';
     }
 
     if (dockerRes?.ok) {
         const list = await dockerRes.json().then(d => Array.isArray(d) ? d : d.containers ?? []);
         document.getElementById('docker-body').innerHTML = list.map(c => {
-            const up = String(c.state ?? c.status ?? '').toLowerCase().includes('running') || String(c.status ?? '').toLowerCase().startsWith('up');
-            const ports = (c.ports ?? []).map(p => typeof p === 'string' ? p : `:${p.public ?? p.private ?? ''}`).join(', ');
+            const up = String(c.status ?? '').toLowerCase().startsWith('up');
+            const ports = typeof c.ports === 'string' ? c.ports : (c.ports ?? []).join(', ');
             return `<tr>
                 <td><span class="dot ${up?'green':'grey'}"></span>${esc(c.name)}</td>
                 <td class="muted">${esc(c.image)}</td>
-                <td class="${up?'green':'muted'}">${esc(c.state ?? c.status ?? '—')}</td>
+                <td class="${up?'green':'muted'}">${esc(c.status ?? '—')}</td>
                 <td class="blue">${esc(ports)}</td>
             </tr>`;
         }).join('') || '<tr><td colspan="4">no data</td></tr>';
