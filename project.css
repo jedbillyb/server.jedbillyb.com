@@ -247,6 +247,34 @@ body {
   color: #22c55e;
 }
 
+.vital-red {
+  color: #e05c5c;
+}
+
+.vital-value-lg {
+  font-size: 36px;
+}
+
+.project-status-stopped {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #999;
+  border: 1px solid #bbb;
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.status-dot-stopped {
+  width: 6px;
+  height: 6px;
+  background-color: #999;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 /* ── log ── */
 
 .log-body {
@@ -277,6 +305,10 @@ body {
 
 .log-yellow .log-text {
   color: #c9a84e;
+}
+
+.log-red .log-text {
+  color: #e05c5c;
 }
 
 /* ── other projects ── */

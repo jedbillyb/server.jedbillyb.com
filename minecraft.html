@@ -2,6 +2,9 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <title>minecraft · server.jedbillyb.com</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="project.css">
 </head>
 
@@ -14,9 +17,178 @@
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
-            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com -></a>
+            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com ↗</a>
         </div>
     </div>
+
+    <main class="project-page">
+        <div class="project-top">
+            <div class="project-meta">
+                <div class="project-label">// project</div>
+                <h1 class="project-title">minecraft</h1>
+                <div class="project-subtitle" id="subtitle">personal smp · currently offline</div>
+            </div>
+            <div class="project-status-stopped" id="status-badge">
+                <span class="status-dot-stopped" id="status-dot"></span>
+                <span id="status-text">stopped · systemd · since <span id="status-since">—</span></span>
+            </div>
+        </div>
+
+        <div class="project-grid">
+            <div class="project-col-left">
+                <div class="card">
+                    <div class="card-header">// description</div>
+                    <div class="description-body"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// stack</div>
+                    <table class="stack-table">
+                        <tr>
+                            <td class="stack-key">version</td>
+                            <td class="stack-val">1.21.1 (vanilla)</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">heap</td>
+                            <td class="stack-val">4 GiB max</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">world</td>
+                            <td class="stack-val">~/mc/world (~1.8 GiB)</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">port</td>
+                            <td class="stack-val">25565</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">runs as</td>
+                            <td class="stack-val">systemd · minecraft.service</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">autostart</td>
+                            <td class="stack-val">no</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="project-col-right">
+                <div class="card">
+                    <div class="card-header">// vitals</div>
+                    <div class="vitals-grid">
+                        <div class="vital">
+                            <div class="vital-label">state</div>
+                            <div class="vital-value vital-value-lg vital-red" id="vital-state">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">last up</div>
+                            <div class="vital-value vital-value-lg" id="vital-lastup">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">heap (cap)</div>
+                            <div class="vital-value" data-vital="heap">4 GiB</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">players</div>
+                            <div class="vital-value" id="vital-players">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// last journal entries</div>
+                    <div class="log-body" id="log-body">
+                        <div class="log-line"><span class="log-time">—</span><span class="log-text">loading…</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// other projects</div>
+                    <div class="other-projects">
+                        <a href="/openclaw.html" class="other-project-link">→ openclaw</a>
+                        <a href="/posthog-webhook.html" class="other-project-link">→ posthog-webhook</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
+        <span>jed blenkhorn · 2026</span>
+    </footer>
+
+<script>
+const API = 'https://server.jedbillyb.com/api';
+
+function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function tsToTime(usec) {
+    return new Date(Number(usec) / 1000).toLocaleTimeString('en-NZ', {
+        hour: '2-digit', minute: '2-digit', hour12: false
+    });
+}
+
+function logClass(msg) {
+    if (/minecraft\.service:\s*(Started|Stopped)/i.test(msg)) return 'log-red';
+    return '';
+}
+
+async function init() {
+    const [vitalsRes, logsRes] = await Promise.all([
+        fetch(`${API}/projects/minecraft/vitals`).catch(() => null),
+        fetch(`${API}/projects/minecraft/logs?limit=7`).catch(() => null),
+    ]);
+
+    if (vitalsRes?.ok) {
+        const v = await vitalsRes.json();
+
+        const state = v.state ?? 'stopped';
+        const isRunning = state === 'running' || state === 'active';
+
+        document.getElementById('vital-state').textContent = state;
+
+        const badge = document.getElementById('status-badge');
+        const dot = document.getElementById('status-dot');
+        if (isRunning) {
+            badge.className = 'project-status';
+            dot.className = 'status-dot';
+            document.getElementById('vital-state').classList.remove('vital-red');
+            document.getElementById('vital-state').classList.add('vital-green');
+            document.getElementById('subtitle').textContent = 'personal smp · online';
+        }
+
+        if (v.last_up) {
+            document.getElementById('vital-lastup').textContent = v.last_up;
+            document.getElementById('status-since').textContent = v.last_up;
+        }
+        if (v.players != null) {
+            document.getElementById('vital-players').textContent = v.players;
+        }
+        if (v.heap) {
+            document.querySelector('[data-vital="heap"]').textContent = v.heap;
+        }
+    }
+
+    if (logsRes?.ok) {
+        const logs = await logsRes.json();
+        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
+        const logBody = document.getElementById('log-body');
+        if (entries.length) {
+            logBody.innerHTML = entries.map(e => {
+                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+                const msg = e.MESSAGE ?? '';
+                const cls = logClass(msg);
+                return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
+            }).join('');
+        }
+    }
+}
+
+init();
+</script>
 </body>
 
 </html>
