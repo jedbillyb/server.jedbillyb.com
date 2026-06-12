@@ -2,6 +2,9 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <title>manifest · server.jedbillyb.com</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="manifest.css">
 </head>
 
@@ -14,9 +17,193 @@
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
-            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com -></a>
+            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com ↗</a>
         </div>
     </div>
+
+    <div class="status-banner">
+        <div class="banner-left">
+            <span class="banner-dot" id="banner-dot"></span>
+            <div>
+                <div class="banner-title" id="banner-title">All systems operational</div>
+                <div class="banner-sub" id="banner-sub">loading…</div>
+            </div>
+        </div>
+        <div class="banner-right">
+            uptime <strong id="banner-uptime">—</strong> &nbsp;·&nbsp; load <strong id="banner-load">—</strong>
+        </div>
+    </div>
+
+    <main class="page">
+        <div class="page-title-block">
+            <h1 class="page-title">server manifest</h1>
+            <p class="page-sub">overview of everything running on the box.</p>
+        </div>
+
+        <div class="stat-cards">
+            <div class="stat-card">
+                <div class="stat-label">CPU</div>
+                <div class="stat-value green" id="stat-cpu">—</div>
+                <div class="stat-bar-track"><div class="stat-bar green-bg" id="bar-cpu" style="width:0%"></div></div>
+                <div class="stat-sub" id="cpu-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">RAM</div>
+                <div class="stat-value orange" id="stat-ram">—</div>
+                <div class="stat-bar-track"><div class="stat-bar orange-bg" id="bar-ram" style="width:0%"></div></div>
+                <div class="stat-sub" id="ram-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">UPTIME</div>
+                <div class="stat-value" id="stat-uptime">—</div>
+                <div class="stat-sub" id="uptime-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">OS</div>
+                <div class="stat-value" id="stat-os">—</div>
+                <div class="stat-sub" id="os-sub">—</div>
+            </div>
+        </div>
+
+        <div class="map-card">
+            <div class="card-header">// server physical location</div>
+            <iframe
+                class="map-frame"
+                src="https://www.google.com/maps?q=-33.8688,151.2093&z=10&output=embed"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+            <div class="map-info">
+                <div class="map-info-item"><div class="map-key">HOST</div><div class="map-val">cloud vps</div></div>
+                <div class="map-info-item"><div class="map-key">REGION</div><div class="map-val">sydney, au</div></div>
+                <div class="map-info-item"><div class="map-key">IPv4</div><div class="map-val" id="map-ipv4">—</div></div>
+                <div class="map-info-item"><div class="map-key">OS</div><div class="map-val" id="map-os">ubuntu 22.04</div></div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="card">
+                <div class="card-header">// key services</div>
+                <table class="data-table">
+                    <thead><tr><th>UNIT</th><th>STATE</th><th>UPTIME</th></tr></thead>
+                    <tbody id="services-body"><tr><td colspan="3">loading…</td></tr></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-header">// top processes · by cpu</div>
+                <table class="data-table">
+                    <thead><tr><th>PROCESS</th><th>CPU</th><th>MEM</th></tr></thead>
+                    <tbody id="procs-body"><tr><td colspan="3">loading…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">// docker containers</div>
+            <table class="data-table">
+                <thead><tr><th>NAME</th><th>IMAGE</th><th>STATE</th><th>PORTS</th></tr></thead>
+                <tbody id="docker-body"><tr><td colspan="4">loading…</td></tr></tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
+        <span>jed blenkhorn · 2026</span>
+    </footer>
+
+<script src="/utils.js"></script>
+<script>
+const API = 'https://server.jedbillyb.com/api';
+
+function fmtMem(bytes) {
+    return bytes >= 1e9 ? (bytes/1e9).toFixed(1)+' G' : Math.round(bytes/1e6)+' M';
+}
+
+async function init() {
+    const [sysRes, servicesRes, dockerRes] = await Promise.all([
+        fetch(`${API}/system`).catch(()=>null),
+        fetch(`${API}/services`).catch(()=>null),
+        fetch(`${API}/docker`).catch(()=>null),
+    ]);
+
+    if (sysRes?.ok) {
+        const s = await sysRes.json();
+
+        const load1 = s.cpu?.load?.[0];
+        const cores = s.cpu?.cores ?? 4;
+        if (load1 != null) {
+            const pct = Math.min(100, load1 / cores * 100);
+            document.getElementById('stat-cpu').textContent = pct.toFixed(0) + '%';
+            document.getElementById('bar-cpu').style.width = pct.toFixed(0) + '%';
+        }
+        const freq = s.cpu?.freq_ghz;
+        document.getElementById('cpu-sub').textContent = [cores && s.cpu?.threads ? `${cores}c/${s.cpu.threads}t` : null, freq ? freq+' GHz' : null].filter(Boolean).join(' · ') || '—';
+
+        const used = s.memory?.used, total = s.memory?.total;
+        if (used && total) {
+            const pct = used / total * 100;
+            document.getElementById('stat-ram').textContent = pct.toFixed(0) + '%';
+            document.getElementById('bar-ram').style.width = pct.toFixed(0) + '%';
+            document.getElementById('ram-sub').textContent = `${(used/1e9).toFixed(1)} / ${(total/1e9).toFixed(1)} GiB`;
+        }
+
+        if (s.uptime) {
+            const fmt = fmtUptime(s.uptime);
+            document.getElementById('stat-uptime').textContent = fmt;
+            document.getElementById('banner-uptime').textContent = fmt;
+            document.getElementById('uptime-sub').textContent = 'since ' + new Date(Date.now() - s.uptime*1000).toISOString().slice(0,10);
+        }
+
+        if (s.os?.name) { document.getElementById('stat-os').textContent = s.os.name; document.getElementById('map-os').textContent = s.os.name.toLowerCase(); }
+        if (s.os?.kernel || s.os?.arch) document.getElementById('os-sub').textContent = [s.os.kernel, s.os.arch].filter(Boolean).join(' · ');
+        if (s.cpu?.load) document.getElementById('banner-load').textContent = s.cpu.load.map(l=>l.toFixed(2)).join(' ');
+        if (s.ipv4) document.getElementById('map-ipv4').textContent = s.ipv4;
+
+        const procs = s.processes ?? [];
+        document.getElementById('procs-body').innerHTML = procs.slice(0,8).map(p => {
+            const cpu = p.cpu != null ? p.cpu.toFixed(1)+'%' : '—';
+            const cls = p.cpu > 5 ? 'green' : '';
+            return `<tr><td>${esc(p.name)}</td><td class="${cls}">${cpu}</td><td class="muted">${fmtMem(p.mem)}</td></tr>`;
+        }).join('') || '<tr><td colspan="3">no data</td></tr>';
+    }
+
+    if (servicesRes?.ok) {
+        const list = await servicesRes.json().then(d => Array.isArray(d) ? d : d.services ?? []);
+        const running = list.filter(s => s.state === 'running' || s.active === 'active').length;
+        const stopped = list.length - running;
+        document.getElementById('banner-sub').textContent = `${running} services running · ${stopped} stopped · last incident 12d ago`;
+        if (stopped > 0) { document.getElementById('banner-dot').className = 'banner-dot warn'; document.getElementById('status-banner')?.classList.add('warn'); }
+
+        document.getElementById('services-body').innerHTML = list.map(s => {
+            const up = s.state === 'running' || s.active === 'active';
+            const uptime = s.uptime ?? (up ? '—' : `since ${s.since ?? '—'}`);
+            return `<tr>
+                <td><span class="dot ${up?'green':'grey'}"></span>${esc(s.name)}</td>
+                <td class="${up?'green':'muted'}">${up?'running':'stopped'}</td>
+                <td class="muted">${esc(uptime)}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="3">no data</td></tr>';
+    }
+
+    if (dockerRes?.ok) {
+        const list = await dockerRes.json().then(d => Array.isArray(d) ? d : d.containers ?? []);
+        document.getElementById('docker-body').innerHTML = list.map(c => {
+            const up = String(c.state ?? c.status ?? '').toLowerCase().includes('running') || String(c.status ?? '').toLowerCase().startsWith('up');
+            const ports = (c.ports ?? []).map(p => typeof p === 'string' ? p : `:${p.public ?? p.private ?? ''}`).join(', ');
+            return `<tr>
+                <td><span class="dot ${up?'green':'grey'}"></span>${esc(c.name)}</td>
+                <td class="muted">${esc(c.image)}</td>
+                <td class="${up?'green':'muted'}">${esc(c.state ?? c.status ?? '—')}</td>
+                <td class="blue">${esc(ports)}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="4">no data</td></tr>';
+    }
+}
+
+init();
+</script>
 </body>
 
 </html>
