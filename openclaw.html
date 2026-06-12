@@ -128,18 +128,9 @@
         <span>jed blenkhorn · 2026</span>
     </footer>
 
+<script src="/utils.js"></script>
 <script>
 const API = 'https://server.jedbillyb.com/api';
-
-function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function tsToTime(usec) {
-    return new Date(Number(usec) / 1000).toLocaleTimeString('en-NZ', {
-        hour: '2-digit', minute: '2-digit', hour12: false
-    });
-}
 
 async function init() {
     const [sysRes, vitalsRes, logsRes] = await Promise.all([

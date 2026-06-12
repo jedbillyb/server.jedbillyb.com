@@ -65,8 +65,6 @@ body {
   color: #5B9BD5;
 }
 
-/* ── project page ── */
-
 .footer {
   display: flex;
   justify-content: space-between;
@@ -172,8 +170,6 @@ body {
   gap: 16px;
 }
 
-/* ── cards ── */
-
 .card {
   background: #fff;
   border: 1px solid #e0e0e0;
@@ -191,8 +187,6 @@ body {
 .description-body {
   height: 130px;
 }
-
-/* ── stack table ── */
 
 .stack-table {
   width: 100%;
@@ -222,8 +216,6 @@ body {
   color: #222;
   vertical-align: middle;
 }
-
-/* ── vitals ── */
 
 .vitals-grid {
   display: grid;
@@ -275,8 +267,6 @@ body {
   flex-shrink: 0;
 }
 
-/* ── log ── */
-
 .log-body {
   padding: 10px 16px;
   display: flex;
@@ -311,8 +301,6 @@ body {
   color: #e05c5c;
 }
 
-/* ── other projects ── */
-
 .other-projects {
   padding: 12px 16px;
   display: flex;
@@ -328,8 +316,6 @@ body {
 .other-project-link:hover {
   opacity: 0.7;
 }
-
-/* ── mobile ── */
 
 @media (max-width: 700px) {
   .project-grid {
