@@ -13,6 +13,7 @@ body {
 }
 
 .header {
+  text-decoration: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -23,8 +24,12 @@ body {
 
 .header a {
   color: black;
-  text-decoration: underline;
+  text-decoration: none;
   font-size: 14px;
+}
+
+.header-right a {
+  color: #7A8593;
 }
 
 .header a.logo {
@@ -40,17 +45,18 @@ body {
 }
 
 .header-right {
+  text-decoration: none;
   display: flex;
   gap: 20px;
   font-family: 'JetBrains Mono', monospace;
-  color: 7A8593;
+  color: #7a9391;
 }
 
 .header a.breadcrumb {
   text-decoration: none;
   font-family: "JetBrains Mono", monospace;
   font-weight: bold;
-  color: 1A2332;
+  color: #1A2332;
 }
 
 .header a:hover {
