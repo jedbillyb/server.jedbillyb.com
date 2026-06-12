@@ -68,6 +68,7 @@
         <div class="map-card">
             <div class="card-header">// server physical location</div>
             <iframe
+                id="map-frame"
                 class="map-frame"
                 src="https://www.google.com/maps?q=-33.8688,151.2093&z=10&output=embed"
                 allowfullscreen
@@ -76,9 +77,9 @@
             </iframe>
             <div class="map-info">
                 <div class="map-info-item"><div class="map-key">HOST</div><div class="map-val">cloud vps</div></div>
-                <div class="map-info-item"><div class="map-key">REGION</div><div class="map-val">sydney, au</div></div>
+                <div class="map-info-item"><div class="map-key">REGION</div><div class="map-val" id="map-region">—</div></div>
                 <div class="map-info-item"><div class="map-key">IPv4</div><div class="map-val" id="map-ipv4">—</div></div>
-                <div class="map-info-item"><div class="map-key">OS</div><div class="map-val" id="map-os">ubuntu 22.04</div></div>
+                <div class="map-info-item"><div class="map-key">OS</div><div class="map-val" id="map-os">—</div></div>
             </div>
         </div>
 
@@ -118,9 +119,11 @@
 const API = 'https://server.jedbillyb.com/api';
 
 async function init() {
-    const [sysRes, servicesRes, procsRes, dockerRes] = await Promise.all([
+    const [sysRes, locationRes, servicesRes, projectsRes, procsRes, dockerRes] = await Promise.all([
         fetch(`${API}/system`).catch(()=>null),
+        fetch(`${API}/system/location`).catch(()=>null),
         fetch(`${API}/services`).catch(()=>null),
+        fetch(`${API}/projects`).catch(()=>null),
         fetch(`${API}/processes`).catch(()=>null),
         fetch(`${API}/docker/containers`).catch(()=>null),
     ]);
@@ -157,21 +160,36 @@ async function init() {
         if (s.cpu?.load) document.getElementById('banner-load').textContent = s.cpu.load.map(l=>l.toFixed(2)).join(' ');
     }
 
-    if (servicesRes?.ok) {
-        const list = await servicesRes.json().then(d => Array.isArray(d) ? d : d.services ?? []);
-        const running = list.filter(s => s.active === 'active').length;
-        const stopped = list.length - running;
+    if (locationRes?.ok) {
+        const loc = await locationRes.json();
+        if (loc.ip) document.getElementById('map-ipv4').textContent = loc.ip;
+        if (loc.city || loc.country) document.getElementById('map-region').textContent = [loc.city, loc.country].filter(Boolean).join(', ').toLowerCase();
+        if (loc.loc) {
+            const [lat, lon] = loc.loc.split(',');
+            document.getElementById('map-frame').src = `https://www.google.com/maps?q=${lat},${lon}&z=10&output=embed`;
+        }
+    }
+
+    if (servicesRes?.ok && projectsRes?.ok) {
+        const allServices = await servicesRes.json().then(d => Array.isArray(d) ? d : d.services ?? []);
+        const projects = await projectsRes.json().then(d => Array.isArray(d) ? d : []);
+
+        const running = allServices.filter(s => s.active === 'active').length;
+        const stopped = allServices.length - running;
         document.getElementById('banner-sub').textContent = `${running} services running · ${stopped} stopped · last incident 12d ago`;
         if (stopped > 0) { document.getElementById('banner-dot').className = 'banner-dot warn'; }
 
-        document.getElementById('services-body').innerHTML = list.map(s => {
+        const serviceMap = Object.fromEntries(allServices.map(s => [s.unit, s]));
+        const keyServices = projects.filter(p => p.service).map(p => {
+            const s = serviceMap[p.service] ?? {};
             const up = s.active === 'active';
             return `<tr>
-                <td><span class="dot ${up?'green':'grey'}"></span>${esc(s.unit)}</td>
-                <td class="${up?'green':'muted'}">${esc(s.sub)}</td>
-                <td class="muted">${esc(s.description ?? '—')}</td>
+                <td><span class="dot ${up?'green':'grey'}"></span>${esc(p.name)}</td>
+                <td class="${up?'green':'muted'}">${esc(s.sub ?? '—')}</td>
+                <td class="muted">${esc(p.service)}</td>
             </tr>`;
-        }).join('') || '<tr><td colspan="3">no data</td></tr>';
+        });
+        document.getElementById('services-body').innerHTML = keyServices.join('') || '<tr><td colspan="3">no data</td></tr>';
     }
 
     if (procsRes?.ok) {
