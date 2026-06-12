@@ -195,7 +195,8 @@ async function init() {
     if (procsRes?.ok) {
         const procs = await procsRes.json();
         document.getElementById('procs-body').innerHTML = procs.slice(0,8).map(p => {
-            const name = p.command?.split(/[\s/]/).filter(Boolean).pop() ?? '—';
+            const tokens = (p.command ?? '').split(/\s+/).filter(Boolean);
+            const name = tokens.map(t => t.split('/').pop()).find(t => t && !t.startsWith('-') && !/^\d+$/.test(t) && t !== '--') ?? tokens[0]?.split('/').pop() ?? '—';
             const cpu = p.cpu != null ? p.cpu.toFixed(1)+'%' : '—';
             const cls = p.cpu > 5 ? 'green' : '';
             return `<tr><td>${esc(name)}</td><td class="${cls}">${cpu}</td><td class="muted">${p.mem != null ? p.mem.toFixed(1)+'%' : '—'}</td></tr>`;
