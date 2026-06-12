@@ -70,7 +70,7 @@
             <iframe
                 id="map-frame"
                 class="map-frame"
-                src="https://www.google.com/maps?q=-33.8688,151.2093&z=10&output=embed"
+                src="https://www.google.com/maps?q=8-14+Egerton+Street,+Silverwater+NSW+2128&z=16&output=embed"
                 allowfullscreen
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade">
@@ -163,12 +163,8 @@ async function init() {
     if (locationRes?.ok) {
         const loc = await locationRes.json();
         if (loc.ip) document.getElementById('map-ipv4').textContent = loc.ip;
-        if (loc.city || loc.country) document.getElementById('map-region').textContent = [loc.city, loc.country].filter(Boolean).join(', ').toLowerCase();
-        if (loc.loc) {
-            const [lat, lon] = loc.loc.split(',');
-            document.getElementById('map-frame').src = `https://www.google.com/maps?q=${lat},${lon}&z=10&output=embed`;
-        }
     }
+    document.getElementById('map-region').textContent = 'silverwater, nsw';
 
     if (servicesRes?.ok && projectsRes?.ok) {
         const allServices = await servicesRes.json().then(d => Array.isArray(d) ? d : d.services ?? []);
