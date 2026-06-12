@@ -169,7 +169,10 @@
 
   async function loadActivity() {
     try {
-      const r = await fetch('/api/activity?limit=5');
+      const box = document.querySelector('.box-recent-logs');
+      const ROW_H = 28;
+      const limit = Math.max(3, Math.floor((box.clientHeight - 32) / ROW_H));
+      const r = await fetch(`/api/activity?limit=${limit}`);
       const entries = await r.json();
       const container = document.getElementById('recent-logs');
       container.innerHTML = entries.map(e => {
