@@ -2,6 +2,9 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <title>posthog-webhook · server.jedbillyb.com</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="project.css">
 </head>
 
@@ -14,9 +17,175 @@
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
-            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com -></a>
+            <a href="https://jedbillyb.com" target="_blank">jedbillyb.com ↗</a>
         </div>
     </div>
+
+    <main class="project-page">
+        <div class="project-top">
+            <div class="project-meta">
+                <div class="project-label">// project</div>
+                <h1 class="project-title">posthog-webhook</h1>
+                <div class="project-subtitle">analytics → telegram</div>
+            </div>
+            <div class="project-status">
+                <span class="status-dot"></span>
+                running · systemd · <span id="uptime-status">—</span>
+            </div>
+        </div>
+
+        <div class="project-links">
+            <a href="https://github.com/jedbillyb/posthog-notify" target="_blank" class="project-link">
+                github ↗ <span class="link-tag">/jedbillyb/posthog-notify</span>
+            </a>
+        </div>
+
+        <div class="project-grid">
+            <div class="project-col-left">
+                <div class="card">
+                    <div class="card-header">// description</div>
+                    <div class="description-body"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// stack</div>
+                    <table class="stack-table">
+                        <tr>
+                            <td class="stack-key">runtime</td>
+                            <td class="stack-val">python 3.12</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">server</td>
+                            <td class="stack-val">fastapi · uvicorn</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">inputs</td>
+                            <td class="stack-val">posthog webhook events</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">outputs</td>
+                            <td class="stack-val">telegram bot api</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">runs as</td>
+                            <td class="stack-val">systemd · posthog-webhook.service</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">proxy</td>
+                            <td class="stack-val">nginx → :4022</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="project-col-right">
+                <div class="card">
+                    <div class="card-header">// vitals</div>
+                    <div class="vitals-grid">
+                        <div class="vital">
+                            <div class="vital-label">cpu</div>
+                            <div class="vital-value vital-green" data-vital="cpu">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">mem</div>
+                            <div class="vital-value vital-green" data-vital="mem">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">events/h</div>
+                            <div class="vital-value" data-vital="events_per_hour">—</div>
+                        </div>
+                        <div class="vital">
+                            <div class="vital-label">last event</div>
+                            <div class="vital-value" data-vital="last_event">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// recent log</div>
+                    <div class="log-body" id="log-body">
+                        <div class="log-line"><span class="log-time">—</span><span class="log-text">loading…</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">// other projects</div>
+                    <div class="other-projects">
+                        <a href="/openclaw.html" class="other-project-link">→ openclaw</a>
+                        <a href="/minecraft.html" class="other-project-link">→ minecraft</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
+        <span>jed blenkhorn · 2026</span>
+    </footer>
+
+<script>
+const API = 'https://server.jedbillyb.com/api';
+
+function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function tsToTime(usec) {
+    return new Date(Number(usec) / 1000).toLocaleTimeString('en-NZ', {
+        hour: '2-digit', minute: '2-digit', hour12: false
+    });
+}
+
+function logClass(msg) {
+    if (msg.startsWith('→ tg')) return 'log-green';
+    if (msg.includes('skipped')) return 'log-yellow';
+    return '';
+}
+
+async function init() {
+    const [sysRes, vitalsRes, logsRes] = await Promise.all([
+        fetch(`${API}/system`).catch(() => null),
+        fetch(`${API}/projects/posthog-webhook/vitals`).catch(() => null),
+        fetch(`${API}/projects/posthog-webhook/logs?limit=7`).catch(() => null),
+    ]);
+
+    if (sysRes?.ok) {
+        const sys = await sysRes.json();
+        const load = sys.cpu?.load?.[0];
+        if (load != null) {
+            document.querySelector('[data-vital="cpu"]').textContent = load.toFixed(1) + '%';
+        }
+        const memUsed = sys.memory?.used;
+        if (memUsed != null) {
+            document.querySelector('[data-vital="mem"]').textContent = Math.round(memUsed / 1024 / 1024) + ' M';
+        }
+    }
+
+    if (vitalsRes?.ok) {
+        const v = await vitalsRes.json();
+        if (v.events_per_hour != null) document.querySelector('[data-vital="events_per_hour"]').textContent = v.events_per_hour;
+        if (v.last_event != null) document.querySelector('[data-vital="last_event"]').textContent = v.last_event;
+        if (v.uptime != null) document.getElementById('uptime-status').textContent = v.uptime;
+    }
+
+    if (logsRes?.ok) {
+        const logs = await logsRes.json();
+        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
+        const logBody = document.getElementById('log-body');
+        if (entries.length) {
+            logBody.innerHTML = entries.map(e => {
+                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+                const msg = e.MESSAGE ?? '';
+                const cls = logClass(msg);
+                return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
+            }).join('');
+        }
+    }
+}
+
+init();
+</script>
 </body>
 
 </html>

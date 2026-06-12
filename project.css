@@ -271,6 +271,14 @@ body {
   color: #bbb;
 }
 
+.log-green .log-text {
+  color: #4ec994;
+}
+
+.log-yellow .log-text {
+  color: #c9a84e;
+}
+
 /* ── other projects ── */
 
 .other-projects {
