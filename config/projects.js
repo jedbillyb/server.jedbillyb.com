@@ -89,6 +89,13 @@ export const projects = [
     path: '/home/ubuntu/openclaw',
   },
   {
+    slug: 'jedbillyb-com',
+    name: 'jedbillyb.com',
+    description: 'Personal site - landing page, extensions, and server dashboard',
+    path: '/var/www/html/jedbillyb.com',
+    url: 'https://jedbillyb.com',
+  },
+  {
     slug: 'server-api',
     name: 'Server API',
     description: 'server.jedbillyb.com REST API server',
