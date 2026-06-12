@@ -92,6 +92,7 @@ export const projects = [
     slug: 'jedbillyb-com',
     name: 'jedbillyb.com',
     description: 'Personal site - landing page, extensions, and server dashboard',
+    service: 'nginx.service',
     path: '/var/www/html/jedbillyb.com',
     url: 'https://jedbillyb.com',
   },
