@@ -97,6 +97,14 @@ export const projects = [
     url: 'https://jedbillyb.com',
   },
   {
+    slug: 'minecraft',
+    name: 'Minecraft SMP',
+    description: 'Personal vanilla SMP server',
+    service: 'minecraft.service',
+    port: 25565,
+    path: '/home/ubuntu/mc',
+  },
+  {
     slug: 'server-api',
     name: 'Server API',
     description: 'server.jedbillyb.com REST API server',
