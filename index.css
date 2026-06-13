@@ -193,6 +193,10 @@ body {
   color: #888;
 }
 
+.box-manifest {
+  background-color: #E8F1F8;
+}
+
 .box-manifest .box-title {
   color: #5B9BD5;
 }
