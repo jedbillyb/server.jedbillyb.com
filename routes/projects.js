@@ -1,8 +1,22 @@
 import { Router } from 'express';
 import { execAsync } from '../utils/exec.js';
+import { inspectContainer } from '../utils/container.js';
+import { mcPing } from '../utils/mcping.js';
 import { projects } from '../config/projects.js';
 
 const router = Router();
+
+
+function since(iso) {
+  if (!iso) return null;
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return null;
+  const m = Math.floor(ms / 60000);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
 
 router.get('/', (req, res) => {
   res.json(projects);
@@ -19,8 +33,27 @@ router.get('/:slug/vitals', async (req, res) => {
   if (!project) return res.status(404).json({ error: 'Project not found' });
 
   const vitals = { slug: project.slug, name: project.name };
+  
+  
+  if (project.mcVersion) vitals.version = project.mcVersion;
 
   await Promise.allSettled([
+    project.container
+      ? inspectContainer(project.container).then(c => {
+          vitals.state = c.state === 'running' ? 'running' : c.state;
+          if (c.startedAt) vitals.last_up = since(c.startedAt);
+          if (c.mem) vitals.heap = c.mem.split('/')[0].trim();
+          if (c.cpu) vitals.cpu = c.cpu;
+        })
+      : Promise.resolve(),
+    project.container
+      ? mcPing(project.mcHost || '127.0.0.1', project.mcPort || 25565)
+          .then(p => {
+            vitals.players = `${p.online}/${p.max}`;
+            if (!vitals.version) vitals.version = p.version;
+          })
+          .catch(() => {  })
+      : Promise.resolve(),
     project.service
       ? execAsync(`systemctl is-active ${project.service}`).then(out => {
           vitals.serviceStatus = out.trim();
@@ -54,12 +87,51 @@ router.get('/:slug/logs', async (req, res) => {
   const { limit = '6' } = req.query;
   const n = Math.min(Math.max(parseInt(limit) || 6, 1), 100);
 
-  let unit = project.service || '';
-  const cmd = unit
-    ? `journalctl -u ${unit} -n ${n} --no-pager -o json`
-    : `journalctl -n ${n} --no-pager -o json`;
-
   try {
+    if (project.container) {
+      
+      
+      
+      const out = await execAsync(
+        `docker logs --timestamps --tail ${Math.min(n * 8, 500)} ${project.container} 2>&1`
+      );
+      const clean = s => (
+        s.replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '') 
+          .split('\r')                           
+          .map(t => t.trim())
+          .filter(Boolean)
+          .pop() || ''
+      );
+      
+      const sensitive = [
+        /]:\s*<[^>]+>/,                 
+        /]:\s*\[[^\]]+ -> [^\]]+\]/,    
+        /]:\s*\* /,                     
+        /issued server command/i,       
+        /\bran command\b/i,             
+      ];
+      
+      const redact = s => s.replace(/(\/)?\b\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?/g, '[redacted]');
+
+      const entries = out.trim().split('\n').filter(Boolean).map(line => {
+        const sp = line.indexOf(' ');
+        const ts = Date.parse(line.slice(0, sp));
+        const raw = Number.isNaN(ts) ? line : line.slice(sp + 1);
+        const msg = clean(raw);
+        const ms = Number.isNaN(ts) ? null : String(ts * 1000);
+        return { MESSAGE: msg, __REALTIME_TIMESTAMP: ms };
+      })
+        .filter(e => e.MESSAGE && !sensitive.some(re => re.test(e.MESSAGE)))
+        .map(e => ({ ...e, MESSAGE: redact(e.MESSAGE) }))
+        .slice(-n);
+
+      return res.json(entries);
+    }
+
+    const unit = project.service || '';
+    const cmd = unit
+      ? `journalctl -u ${unit} -n ${n} --no-pager -o json`
+      : `journalctl -n ${n} --no-pager -o json`;
     const out = await execAsync(cmd);
     const entries = out.trim().split('\n').filter(Boolean).map(line => {
       try { return JSON.parse(line); } catch { return { MESSAGE: line }; }

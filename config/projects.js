@@ -99,10 +99,14 @@ export const projects = [
   {
     slug: 'minecraft',
     name: 'Minecraft SMP',
-    description: 'Personal vanilla SMP server',
-    service: 'minecraft.service',
+    description: 'Personal survival server, hosted in Pelican (Wings/Docker)',
+    container: '4f849fc4-b3f1-4074-afda-1593b8ad14f2',
+    mcHost: '10.0.0.245',
+    mcPort: 25565,
+    mcVersion: 'Paper 1.21.11',
     port: 25565,
-    path: '/home/ubuntu/mc',
+    panel: 'https://mc.jedbillyb.com',
+    path: '/var/lib/pelican/volumes/4f849fc4-b3f1-4074-afda-1593b8ad14f2',
   },
   {
     slug: 'server-api',
