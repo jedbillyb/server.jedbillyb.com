@@ -26,11 +26,11 @@
             <div class="project-meta">
                 <div class="project-label">// project</div>
                 <h1 class="project-title">minecraft</h1>
-                <div class="project-subtitle" id="subtitle">personal smp · currently offline</div>
+                <div class="project-subtitle" id="subtitle">personal survival server · loading…</div>
             </div>
             <div class="project-status-stopped" id="status-badge">
                 <span class="status-dot-stopped" id="status-dot"></span>
-                <span id="status-text">stopped · systemd · since <span id="status-since">—</span></span>
+                <span id="status-text">— · pelican · <span id="status-since">—</span></span>
             </div>
         </div>
 
@@ -46,27 +46,27 @@
                     <table class="stack-table">
                         <tr>
                             <td class="stack-key">version</td>
-                            <td class="stack-val">1.21.1 (vanilla)</td>
+                            <td class="stack-val">Paper 26.1.2</td>
                         </tr>
                         <tr>
                             <td class="stack-key">heap</td>
-                            <td class="stack-val">4 GiB max</td>
-                        </tr>
-                        <tr>
-                            <td class="stack-key">world</td>
-                            <td class="stack-val">~/mc/world (~1.8 GiB)</td>
+                            <td class="stack-val">12 GiB max</td>
                         </tr>
                         <tr>
                             <td class="stack-key">port</td>
-                            <td class="stack-val">25565</td>
+                            <td class="stack-val">25565 (Java) · 19132 (Bedrock)</td>
                         </tr>
                         <tr>
                             <td class="stack-key">runs as</td>
-                            <td class="stack-val">systemd · minecraft.service</td>
+                            <td class="stack-val">Pelican · Wings (Docker)</td>
+                        </tr>
+                        <tr>
+                            <td class="stack-key">panel</td>
+                            <td class="stack-val">mc.jedbillyb.com</td>
                         </tr>
                         <tr>
                             <td class="stack-key">autostart</td>
-                            <td class="stack-val">no</td>
+                            <td class="stack-val">yes</td>
                         </tr>
                     </table>
                 </div>
@@ -123,7 +123,7 @@
 const API = 'https://server.jedbillyb.com/api';
 
 function logClass(msg) {
-    if (/minecraft\.service:\s*(Started|Stopped)/i.test(msg)) return 'log-red';
+    if (/\b(ERROR|FATAL|Stopping server)\b/i.test(msg)) return 'log-red';
     return '';
 }
 
@@ -148,12 +148,17 @@ async function init() {
             dot.className = 'status-dot';
             document.getElementById('vital-state').classList.remove('vital-red');
             document.getElementById('vital-state').classList.add('vital-green');
-            document.getElementById('subtitle').textContent = 'personal smp · online';
+            document.getElementById('subtitle').textContent = 'personal survival server · online';
+        } else {
+            document.getElementById('subtitle').textContent = 'personal survival server · offline';
         }
+
+        const verb = isRunning ? 'up' : 'since';
+        document.getElementById('status-text').innerHTML =
+            `${esc(state)} · pelican · ${verb} <span id="status-since">${esc(v.last_up ?? '—')}</span>`;
 
         if (v.last_up) {
             document.getElementById('vital-lastup').textContent = v.last_up;
-            document.getElementById('status-since').textContent = v.last_up;
         }
         if (v.players != null) {
             document.getElementById('vital-players').textContent = v.players;
