@@ -67,6 +67,8 @@ router.get('/:slug/vitals', async (req, res) => {
             vitals.pm2Status = proc.pm2_env?.status;
             vitals.pm2Restarts = proc.pm2_env?.restart_time;
             vitals.pm2Uptime = proc.pm2_env?.pm_uptime;
+            if (proc.monit?.memory != null) vitals.memBytes = proc.monit.memory;
+            if (proc.monit?.cpu != null) vitals.cpuPercent = proc.monit.cpu;
           }
         })
       : Promise.resolve(),
