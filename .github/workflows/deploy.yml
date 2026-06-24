@@ -18,7 +18,9 @@ jobs:
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd /home/ubuntu/server-api
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             npm install --omit=dev
-            sudo systemctl restart server-api
+            pm2 restart server-api --update-env
