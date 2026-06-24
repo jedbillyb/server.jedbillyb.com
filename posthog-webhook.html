@@ -173,6 +173,8 @@ async function init() {
 }
 
 init();
+setInterval(init, 4000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
 </script>
 </body>
 

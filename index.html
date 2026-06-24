@@ -188,9 +188,15 @@
     } catch {}
   }
 
-  loadStatus();
-  document.querySelectorAll('[data-slug]').forEach(loadVitals);
-  loadActivity();
+  function refresh() {
+    loadStatus();
+    document.querySelectorAll('[data-slug]').forEach(loadVitals);
+    loadActivity();
+  }
+
+  refresh();
+  setInterval(refresh, 4000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
 </script>
 
 </body>
