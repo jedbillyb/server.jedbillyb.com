@@ -55,9 +55,17 @@ router.get('/:slug/vitals', async (req, res) => {
           .catch(() => {  })
       : Promise.resolve(),
     project.service
-      ? execAsync(`systemctl is-active ${project.service}`).then(out => {
-          vitals.serviceStatus = out.trim();
-        })
+      ? execAsync(`systemctl show ${project.service} -p ActiveState -p MemoryCurrent`).then(out => {
+          const props = Object.fromEntries(
+            out.trim().split('\n').map(l => l.split('=').map(s => s.trim()))
+          );
+          if (props.ActiveState) vitals.serviceStatus = props.ActiveState;
+          const mem = Number(props.MemoryCurrent);
+          
+          if (Number.isFinite(mem) && mem > 0 && mem < Number.MAX_SAFE_INTEGER) {
+            vitals.memBytes = mem;
+          }
+        }).catch(() => {  })
       : Promise.resolve(),
     project.pm2
       ? execAsync('pm2 jlist').then(out => {
@@ -73,8 +81,18 @@ router.get('/:slug/vitals', async (req, res) => {
         })
       : Promise.resolve(),
     project.port
-      ? execAsync(`ss -tlnp | grep :${project.port}`).then(out => {
+      ? execAsync(`ss -tlnp | grep :${project.port}`).then(async out => {
           vitals.portListening = out.trim() !== '';
+          
+          
+          if (!project.service && !project.pm2 && out.trim() !== '') {
+            const pid = out.match(/pid=(\d+)/)?.[1];
+            if (pid) {
+              const rss = await execAsync(`awk '/^VmRSS:/{print $2}' /proc/${pid}/status`)
+                .then(r => Number(r.trim()) * 1024).catch(() => null);
+              if (Number.isFinite(rss) && rss > 0) vitals.memBytes = rss;
+            }
+          }
         }).catch(() => { vitals.portListening = false; })
       : Promise.resolve(),
   ]);
