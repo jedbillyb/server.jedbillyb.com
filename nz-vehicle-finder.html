@@ -158,8 +158,6 @@ async function init() {
         const sys = await sysRes.json();
         const load = sys.cpu?.load?.[0];
         if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
-        const memPct = sys.memory?.usedPercent;
-        if (memPct != null) document.querySelector('[data-vital="mem"]').textContent = memPct + '%';
     }
 
     if (vitalsRes?.ok) {
@@ -174,6 +172,7 @@ async function init() {
             if (v.portListening) portEl.classList.add('vital-green');
         }
         if (v.pm2Uptime) document.getElementById('uptime').textContent = formatUptime(v.pm2Uptime / 1000);
+        if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
     if (logsRes?.ok) {
