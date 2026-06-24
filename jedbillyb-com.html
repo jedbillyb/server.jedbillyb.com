@@ -158,8 +158,6 @@ async function init() {
         const sys = await sysRes.json();
         const load = sys.cpu?.load?.[0];
         if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
-        const memPct = sys.memory?.usedPercent;
-        if (memPct != null) document.querySelector('[data-vital="mem"]').textContent = memPct + '%';
         const disk = sys.disk?.usedPercent;
         if (disk != null) document.querySelector('[data-vital="disk"]').textContent = disk + '%';
         if (sys.uptime) document.getElementById('uptime').textContent = formatUptime(sys.uptime);
@@ -171,6 +169,10 @@ async function init() {
         const el = document.querySelector('[data-vital="nginx"]');
         el.textContent = sub;
         if (sub === 'running') el.classList.add('vital-green');
+        const mem = Number(nginx.MemoryCurrent);
+        if (Number.isFinite(mem) && mem > 0 && mem < Number.MAX_SAFE_INTEGER) {
+            document.querySelector('[data-vital="mem"]').textContent = (mem / 1048576).toFixed(0) + ' MB';
+        }
     }
 
     if (logsRes?.ok) {

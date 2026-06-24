@@ -147,10 +147,6 @@ async function init() {
         if (load != null) {
             document.querySelector('[data-vital="cpu"]').textContent = load.toFixed(1) + '%';
         }
-        const memUsed = sys.memory?.used;
-        if (memUsed != null) {
-            document.querySelector('[data-vital="mem"]').textContent = Math.round(memUsed / 1024 / 1024) + ' M';
-        }
     }
 
     if (vitalsRes?.ok) {
@@ -158,6 +154,7 @@ async function init() {
         if (v.events_per_hour != null) document.querySelector('[data-vital="events_per_hour"]').textContent = v.events_per_hour;
         if (v.last_event != null) document.querySelector('[data-vital="last_event"]').textContent = v.last_event;
         if (v.uptime != null) document.getElementById('uptime-status').textContent = v.uptime;
+        if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
     if (logsRes?.ok) {

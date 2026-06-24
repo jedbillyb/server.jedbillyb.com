@@ -147,17 +147,13 @@ async function init() {
             document.querySelector('[data-vital="cpu"]').textContent = pct;
             document.getElementById('cpu-status').textContent = '~' + pct + ' cpu';
         }
-        const memUsed = sys.memory?.used;
-        if (memUsed != null) {
-            const mb = Math.round(memUsed / 1024 / 1024);
-            document.querySelector('[data-vital="mem"]').textContent = mb + ' M';
-        }
     }
 
     if (vitalsRes?.ok) {
         const v = await vitalsRes.json();
         if (v.model) document.querySelector('[data-vital="model"]').textContent = v.model;
         if (v.memoryFiles != null) document.querySelector('[data-vital="memory"]').textContent = v.memoryFiles + ' .md';
+        if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
     if (logsRes?.ok) {
