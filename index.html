@@ -185,10 +185,10 @@
   const slugs = [...document.querySelectorAll('[data-slug]')].map(b => b.dataset.slug);
   const logsBox = document.querySelector('.box-recent-logs');
 
-  // Each .log-row is a fixed 30px (border-box, no gap) and the box has 14px
+  // Each .log-row is a fixed 30px (border-box, no gap) and the box has 7px
   // top + bottom padding, so the available height divides cleanly by the row
   // height — no fudge factor needed.
-  const rowsThatFit = () => Math.max(3, Math.floor((logsBox.clientHeight - 28) / 30));
+  const rowsThatFit = () => Math.max(3, Math.floor((logsBox.clientHeight - 14) / 30));
 
   let stream;
   let lastLimit = 0;

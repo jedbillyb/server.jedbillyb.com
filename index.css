@@ -113,7 +113,7 @@ body {
   display: block;
   font-size: 13px;
   color: #7A8593;
-  margin-top: -12px;
+  margin-top: 0;
   margin-left: 20px;
   margin-bottom: 8px;
 }
@@ -226,7 +226,10 @@ body {
 .box-recent-logs {
   background-color: #fff;
   border: 1px solid #e0e0e0;
-  padding: 14px;
+  /* Less vertical than horizontal padding: each row centres its text in 30px,
+     so ~7px of leading sits above the first row. Trimming the top/bottom
+     padding by that amount makes the text inset square with the 14px sides. */
+  padding: 7px 14px;
   margin: 0 20px 20px;
   display: flex;
   flex-direction: column;
