@@ -248,6 +248,10 @@ body {
 
 .data-table tr:last-child td { border-bottom: none; }
 
+/* keep the docker STATE column on one line ("Up 12 days (healthy)") */
+.docker-table th:nth-child(3),
+.docker-table td:nth-child(3) { white-space: nowrap; }
+
 .dot {
   display: inline-block;
   width: 7px;
