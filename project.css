@@ -186,7 +186,19 @@ body {
 }
 
 .description-body {
-  height: 130px;
+  min-height: 130px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.description-body p {
+  margin: 0;
+}
+
+.description-body p + p {
+  margin-top: 10px;
 }
 
 .stack-table {
