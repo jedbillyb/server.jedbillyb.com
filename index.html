@@ -185,9 +185,9 @@
   const slugs = [...document.querySelectorAll('[data-slug]')].map(b => b.dataset.slug);
   const logsBox = document.querySelector('.box-recent-logs');
   // Row height: ~13px line + 10px padding + 1px border + 2px gap ≈ 30px.
-  // Subtract the 32px box padding plus an 8px safety margin so we never
-  // render one row too many and overflow the viewport.
-  const logLimit = Math.max(3, Math.floor((logsBox.clientHeight - 40) / 30));
+  // Subtract the 28px box padding (14px top + bottom) plus a small 2px
+  // safety margin so we fit as many rows as possible without overflowing.
+  const logLimit = Math.max(3, Math.floor((logsBox.clientHeight - 30) / 30));
 
   const params = new URLSearchParams({ status: '1', activity: String(logLimit), interval: '2000' });
   if (slugs.length) params.set('vitals', slugs.join(','));
