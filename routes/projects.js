@@ -28,10 +28,7 @@ router.get('/:slug', (req, res) => {
   res.json(project);
 });
 
-router.get('/:slug/vitals', async (req, res) => {
-  const project = projects.find(p => p.slug === req.params.slug);
-  if (!project) return res.status(404).json({ error: 'Project not found' });
-
+export async function collectProjectVitals(project) {
   const vitals = { slug: project.slug, name: project.name };
   
   
@@ -97,18 +94,13 @@ router.get('/:slug/vitals', async (req, res) => {
       : Promise.resolve(),
   ]);
 
-  res.json(vitals);
-});
+  return vitals;
+}
 
-router.get('/:slug/logs', async (req, res) => {
-  const project = projects.find(p => p.slug === req.params.slug);
-  if (!project) return res.status(404).json({ error: 'Project not found' });
-
-  const { limit = '6' } = req.query;
+export async function collectProjectLogs(project, limit = 6) {
   const n = Math.min(Math.max(parseInt(limit) || 6, 1), 100);
 
-  try {
-    if (project.container) {
+  if (project.container) {
       
       
       
@@ -145,21 +137,38 @@ router.get('/:slug/logs', async (req, res) => {
         .map(e => ({ ...e, MESSAGE: redact(e.MESSAGE) }))
         .slice(-n);
 
-      return res.json(entries);
-    }
+      return entries;
+  }
 
-    const unit = project.service || '';
-    const cmd = unit
-      ? `journalctl -u ${unit} -n ${n} --no-pager -o json`
-      : `journalctl -n ${n} --no-pager -o json`;
-    const out = await execAsync(cmd);
-    const entries = out.trim().split('\n').filter(Boolean).map(line => {
-      try { return JSON.parse(line); } catch { return { MESSAGE: line }; }
-    });
-    res.json(entries);
+  const unit = project.service || '';
+  const cmd = unit
+    ? `journalctl -u ${unit} -n ${n} --no-pager -o json`
+    : `journalctl -n ${n} --no-pager -o json`;
+  const out = await execAsync(cmd);
+  return out.trim().split('\n').filter(Boolean).map(line => {
+    try { return JSON.parse(line); } catch { return { MESSAGE: line }; }
+  });
+}
+
+router.get('/:slug/vitals', async (req, res) => {
+  const project = projects.find(p => p.slug === req.params.slug);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+  try {
+    res.json(await collectProjectVitals(project));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+router.get('/:slug/logs', async (req, res) => {
+  const project = projects.find(p => p.slug === req.params.slug);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+  try {
+    res.json(await collectProjectLogs(project, req.query.limit));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+export { projects };
 export default router;
