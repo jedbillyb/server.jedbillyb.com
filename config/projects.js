@@ -87,6 +87,7 @@ export const projects = [
     description: 'Personal AI agent with Telegram and Discord integration',
     port: 18789,
     path: '/home/ubuntu/openclaw',
+    openclawHome: '/home/ubuntu/.openclaw',
   },
   {
     slug: 'jedbillyb-com',

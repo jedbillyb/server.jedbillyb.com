@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { readFile, readdir } from 'fs/promises';
 import { execAsync } from '../utils/exec.js';
 import { inspectContainer } from '../utils/container.js';
 import { mcPing } from '../utils/mcping.js';
@@ -91,6 +92,20 @@ export async function collectProjectVitals(project) {
             }
           }
         }).catch(() => { vitals.portListening = false; })
+      : Promise.resolve(),
+    project.openclawHome
+      ? Promise.allSettled([
+          
+          
+          readFile(`${project.openclawHome}/openclaw.json`, 'utf8').then(raw => {
+            const primary = JSON.parse(raw)?.agents?.defaults?.model?.primary;
+            if (primary) vitals.model = primary.split('/').pop();
+          }),
+          
+          readdir(`${project.openclawHome}/workspace`).then(files => {
+            vitals.memoryFiles = files.filter(f => f.endsWith('.md')).length;
+          }),
+        ])
       : Promise.resolve(),
   ]);
 
