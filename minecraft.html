@@ -129,15 +129,9 @@ function logClass(msg) {
     return '';
 }
 
-async function init() {
-    const [vitalsRes, logsRes] = await Promise.all([
-        fetch(`${API}/projects/minecraft/vitals`).catch(() => null),
-        fetch(`${API}/projects/minecraft/logs?limit=7`).catch(() => null),
-    ]);
-
-    if (vitalsRes?.ok) {
-        const v = await vitalsRes.json();
-
+function apply(snap) {
+    const v = snap.vitals?.minecraft;
+    if (v) {
         const state = v.state ?? 'stopped';
         const isRunning = state === 'running' || state === 'active';
 
@@ -170,24 +164,19 @@ async function init() {
         }
     }
 
-    if (logsRes?.ok) {
-        const logs = await logsRes.json();
-        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
-        const logBody = document.getElementById('log-body');
-        if (entries.length) {
-            logBody.innerHTML = entries.map(e => {
-                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
-                const msg = e.MESSAGE ?? '';
-                const cls = logClass(msg);
-                return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
-            }).join('');
-        }
+    const entries = snap.projectLogs?.minecraft;
+    if (Array.isArray(entries) && entries.length) {
+        document.getElementById('log-body').innerHTML = entries.map(e => {
+            const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+            const msg = e.MESSAGE ?? '';
+            const cls = logClass(msg);
+            return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
+        }).join('');
     }
 }
 
-init();
-setInterval(init, 4000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
+const stream = new EventSource(`${API}/stream?vitals=minecraft&projectLogs=minecraft&logsLimit=7&interval=1000`);
+stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>
 

@@ -118,18 +118,18 @@
 <script>
 const API = 'https://server.jedbillyb.com/api';
 
-async function init() {
-    const [sysRes, locationRes, servicesRes, projectsRes, procsRes, dockerRes] = await Promise.all([
-        fetch(`${API}/system`).catch(()=>null),
-        fetch(`${API}/system/location`).catch(()=>null),
-        fetch(`${API}/services`).catch(()=>null),
-        fetch(`${API}/projects`).catch(()=>null),
-        fetch(`${API}/processes`).catch(()=>null),
-        fetch(`${API}/docker/containers`).catch(()=>null),
-    ]);
+async function loadLocation() {
+    try {
+        const r = await fetch(`${API}/system/location`);
+        if (!r.ok) return;
+        const loc = await r.json();
+        if (loc.ip) document.getElementById('map-ipv4').textContent = loc.ip;
+    } catch {}
+}
 
-    if (sysRes?.ok) {
-        const s = await sysRes.json();
+function apply(snap) {
+    if (snap.system) {
+        const s = snap.system;
 
         const load1 = s.cpu?.load?.[0];
         const cores = s.cpu?.cores ?? 4;
@@ -160,15 +160,9 @@ async function init() {
         if (s.cpu?.load) document.getElementById('banner-load').textContent = s.cpu.load.map(l=>l.toFixed(2)).join(' ');
     }
 
-    if (locationRes?.ok) {
-        const loc = await locationRes.json();
-        if (loc.ip) document.getElementById('map-ipv4').textContent = loc.ip;
-    }
-    document.getElementById('map-region').textContent = 'silverwater, nsw';
-
-    if (servicesRes?.ok && projectsRes?.ok) {
-        const allServices = await servicesRes.json().then(d => Array.isArray(d) ? d : d.services ?? []);
-        const projects = await projectsRes.json().then(d => Array.isArray(d) ? d : []);
+    if (snap.services && snap.projects) {
+        const allServices = Array.isArray(snap.services) ? snap.services : (snap.services.services ?? []);
+        const projects = Array.isArray(snap.projects) ? snap.projects : [];
 
         const running = allServices.filter(s => s.active === 'active').length;
         const stopped = allServices.length - running;
@@ -188,8 +182,8 @@ async function init() {
         document.getElementById('services-body').innerHTML = keyServices.join('') || '<tr><td colspan="3">no data</td></tr>';
     }
 
-    if (procsRes?.ok) {
-        const procs = await procsRes.json();
+    if (snap.processes) {
+        const procs = snap.processes;
         document.getElementById('procs-body').innerHTML = procs.slice(0,8).map(p => {
             const tokens = (p.command ?? '').split(/\s+/).filter(Boolean);
             const name = tokens.map(t => t.split('/').pop()).find(t => t && !t.startsWith('-') && !/^\d+$/.test(t) && t !== '--') ?? tokens[0]?.split('/').pop() ?? '—';
@@ -199,8 +193,8 @@ async function init() {
         }).join('') || '<tr><td colspan="3">no data</td></tr>';
     }
 
-    if (dockerRes?.ok) {
-        const list = await dockerRes.json().then(d => Array.isArray(d) ? d : d.containers ?? []);
+    if (snap.docker) {
+        const list = Array.isArray(snap.docker) ? snap.docker : (snap.docker.containers ?? []);
         document.getElementById('docker-body').innerHTML = list.map(c => {
             const up = String(c.status ?? '').toLowerCase().startsWith('up');
             const ports = typeof c.ports === 'string' ? c.ports : (c.ports ?? []).join(', ');
@@ -214,9 +208,10 @@ async function init() {
     }
 }
 
-init();
-setInterval(init, 4000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
+document.getElementById('map-region').textContent = 'silverwater, nsw';
+loadLocation();
+const stream = new EventSource(`${API}/stream?system=1&services=1&projects=1&processes=8&docker=1&interval=2000`);
+stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>
 

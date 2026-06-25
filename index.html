@@ -131,29 +131,20 @@
     return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
   }
 
-  async function loadStatus() {
-    try {
-      const r = await fetch('/api/status');
-      const d = await r.json();
-      document.querySelector('.stat-row:nth-child(1) .stat-value').textContent = d.ok ? 'online' : 'degraded';
-      document.querySelector('.stat-row:nth-child(2) .stat-value').textContent = fmtUptime(d.uptime);
-      document.querySelector('.stat-row:nth-child(3) .stat-value').textContent =
-        d.failedServices === 0 ? 'all running' : `${d.failedServices} failed`;
-      document.querySelector('.stat-row:nth-child(4) .stat-value').textContent =
-        d.failedServices === 0 ? 'none' : 'now';
-    } catch {}
+  function applyStatus(d) {
+    document.querySelector('.stat-row:nth-child(1) .stat-value').textContent = d.ok ? 'online' : 'degraded';
+    document.querySelector('.stat-row:nth-child(2) .stat-value').textContent = fmtUptime(d.uptime);
+    document.querySelector('.stat-row:nth-child(3) .stat-value').textContent =
+      d.failedServices === 0 ? 'all running' : `${d.failedServices} failed`;
+    document.querySelector('.stat-row:nth-child(4) .stat-value').textContent =
+      d.failedServices === 0 ? 'none' : 'now';
   }
 
-  async function loadVitals(box) {
-    const slug = box.dataset.slug;
-    try {
-      const r = await fetch(`/api/projects/${slug}/vitals`);
-      const d = await r.json();
-      const up = d.serviceStatus === 'active' || d.pm2Status === 'online' || d.portListening === true;
-      const el = box.querySelector('.box-status');
-      el.textContent = up ? 'running' : 'stopped';
-      el.classList.add(up ? 'running' : 'stopped');
-    } catch {}
+  function applyVitals(box, d) {
+    const up = d.serviceStatus === 'active' || d.pm2Status === 'online' || d.portListening === true;
+    const el = box.querySelector('.box-status');
+    el.textContent = up ? 'running' : 'stopped';
+    el.classList.add(up ? 'running' : 'stopped');
   }
 
   const SERVICE_COLORS = {
@@ -165,39 +156,40 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  let logLimit = null;
-  async function loadActivity() {
-    try {
-      const box = document.querySelector('.box-recent-logs');
-      const ROW_H = 28;
-      if (logLimit === null) logLimit = Math.max(3, Math.floor((box.clientHeight - 32) / ROW_H));
-      const r = await fetch(`/api/activity?limit=${logLimit}`);
-      const entries = await r.json();
-      const container = document.getElementById('recent-logs');
-      container.innerHTML = entries.map(e => {
-        const unit = esc((e._SYSTEMD_UNIT || e.SYSLOG_IDENTIFIER || 'unknown').replace('.service', ''));
-        const msg = esc(e.MESSAGE || '');
-        const ts = e.__REALTIME_TIMESTAMP ? new Date(Number(e.__REALTIME_TIMESTAMP) / 1000) : new Date();
-        const time = ts.toTimeString().slice(0, 5);
-        const color = SERVICE_COLORS[unit] || '#4aab8a';
-        return `<div class="log-row">
-          <span class="log-time">${time}</span>
-          <span class="log-service" style="color:${color}">${unit}</span>
-          <span class="log-msg">${msg}</span>
-        </div>`;
-      }).join('');
-    } catch {}
+  function applyActivity(entries) {
+    document.getElementById('recent-logs').innerHTML = entries.map(e => {
+      const unit = esc((e._SYSTEMD_UNIT || e.SYSLOG_IDENTIFIER || 'unknown').replace('.service', ''));
+      const msg = esc(e.MESSAGE || '');
+      const ts = e.__REALTIME_TIMESTAMP ? new Date(Number(e.__REALTIME_TIMESTAMP) / 1000) : new Date();
+      const time = ts.toTimeString().slice(0, 5);
+      const color = SERVICE_COLORS[unit] || '#4aab8a';
+      return `<div class="log-row">
+        <span class="log-time">${time}</span>
+        <span class="log-service" style="color:${color}">${unit}</span>
+        <span class="log-msg">${msg}</span>
+      </div>`;
+    }).join('');
   }
 
-  function refresh() {
-    loadStatus();
-    document.querySelectorAll('[data-slug]').forEach(loadVitals);
-    loadActivity();
+  function apply(snap) {
+    if (snap.status) applyStatus(snap.status);
+    if (snap.vitals) {
+      document.querySelectorAll('[data-slug]').forEach(box => {
+        const d = snap.vitals[box.dataset.slug];
+        if (d) applyVitals(box, d);
+      });
+    }
+    if (Array.isArray(snap.activity)) applyActivity(snap.activity);
   }
 
-  refresh();
-  setInterval(refresh, 4000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  const slugs = [...document.querySelectorAll('[data-slug]')].map(b => b.dataset.slug);
+  const logsBox = document.querySelector('.box-recent-logs');
+  const logLimit = Math.max(3, Math.floor((logsBox.clientHeight - 32) / 28));
+
+  const params = new URLSearchParams({ status: '1', activity: String(logLimit), interval: '2000' });
+  if (slugs.length) params.set('vitals', slugs.join(','));
+  const stream = new EventSource(`/api/stream?${params}`);
+  stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 
 </body>

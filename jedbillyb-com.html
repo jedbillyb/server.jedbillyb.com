@@ -149,15 +149,9 @@ function tsToTime(usec) {
     });
 }
 
-async function init() {
-    const [sysRes, nginxRes, logsRes] = await Promise.all([
-        fetch(`${API}/system`).catch(() => null),
-        fetch(`${API}/services/nginx.service`).catch(() => null),
-        fetch(`${API}/logs?unit=nginx&limit=5`).catch(() => null),
-    ]);
-
-    if (sysRes?.ok) {
-        const sys = await sysRes.json();
+function apply(snap) {
+    if (snap.system) {
+        const sys = snap.system;
         const load = sys.cpu?.load?.[0];
         if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
         const disk = sys.disk?.usedPercent;
@@ -165,8 +159,8 @@ async function init() {
         if (sys.uptime) document.getElementById('uptime').textContent = formatUptime(sys.uptime);
     }
 
-    if (nginxRes?.ok) {
-        const nginx = await nginxRes.json();
+    const nginx = snap.service?.['nginx.service'];
+    if (nginx) {
         const sub = nginx.SubState ?? nginx.sub ?? '—';
         const el = document.querySelector('[data-vital="nginx"]');
         el.textContent = sub;
@@ -177,22 +171,16 @@ async function init() {
         }
     }
 
-    if (logsRes?.ok) {
-        const logs = await logsRes.json();
-        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
-        const logBody = document.getElementById('log-body');
-        if (entries.length) {
-            logBody.innerHTML = entries.map(e => {
-                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
-                return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
-            }).join('');
-        }
+    if (Array.isArray(snap.logs) && snap.logs.length) {
+        document.getElementById('log-body').innerHTML = snap.logs.map(e => {
+            const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+            return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
+        }).join('');
     }
 }
 
-init();
-setInterval(init, 4000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
+const stream = new EventSource(`${API}/stream?system=1&service=nginx.service&logs=nginx&logsLimit=5&interval=1000`);
+stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>
 

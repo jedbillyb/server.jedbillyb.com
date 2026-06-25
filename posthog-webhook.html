@@ -136,47 +136,35 @@ function logClass(msg) {
     return '';
 }
 
-async function init() {
-    const [sysRes, vitalsRes, logsRes] = await Promise.all([
-        fetch(`${API}/system`).catch(() => null),
-        fetch(`${API}/projects/posthog-webhook/vitals`).catch(() => null),
-        fetch(`${API}/projects/posthog-webhook/logs?limit=7`).catch(() => null),
-    ]);
-
-    if (sysRes?.ok) {
-        const sys = await sysRes.json();
-        const load = sys.cpu?.load?.[0];
+function apply(snap) {
+    if (snap.system) {
+        const load = snap.system.cpu?.load?.[0];
         if (load != null) {
             document.querySelector('[data-vital="cpu"]').textContent = load.toFixed(1) + '%';
         }
     }
 
-    if (vitalsRes?.ok) {
-        const v = await vitalsRes.json();
+    const v = snap.vitals?.['posthog-webhook'];
+    if (v) {
         if (v.events_per_hour != null) document.querySelector('[data-vital="events_per_hour"]').textContent = v.events_per_hour;
         if (v.last_event != null) document.querySelector('[data-vital="last_event"]').textContent = v.last_event;
         if (v.uptime != null) document.getElementById('uptime-status').textContent = v.uptime;
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
-    if (logsRes?.ok) {
-        const logs = await logsRes.json();
-        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
-        const logBody = document.getElementById('log-body');
-        if (entries.length) {
-            logBody.innerHTML = entries.map(e => {
-                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
-                const msg = e.MESSAGE ?? '';
-                const cls = logClass(msg);
-                return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
-            }).join('');
-        }
+    const entries = snap.projectLogs?.['posthog-webhook'];
+    if (Array.isArray(entries) && entries.length) {
+        document.getElementById('log-body').innerHTML = entries.map(e => {
+            const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+            const msg = e.MESSAGE ?? '';
+            const cls = logClass(msg);
+            return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
+        }).join('');
     }
 }
 
-init();
-setInterval(init, 4000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
+const stream = new EventSource(`${API}/stream?system=1&vitals=posthog-webhook&projectLogs=posthog-webhook&logsLimit=7&interval=1000`);
+stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>
 

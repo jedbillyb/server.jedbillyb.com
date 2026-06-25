@@ -149,21 +149,14 @@ function tsToTime(usec) {
     });
 }
 
-async function init() {
-    const [sysRes, vitalsRes, logsRes] = await Promise.all([
-        fetch(`${API}/system`).catch(() => null),
-        fetch(`${API}/projects/vehicle-api/vitals`).catch(() => null),
-        fetch(`${API}/projects/vehicle-api/logs?limit=6`).catch(() => null),
-    ]);
-
-    if (sysRes?.ok) {
-        const sys = await sysRes.json();
-        const load = sys.cpu?.load?.[0];
+function apply(snap) {
+    if (snap.system) {
+        const load = snap.system.cpu?.load?.[0];
         if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
     }
 
-    if (vitalsRes?.ok) {
-        const v = await vitalsRes.json();
+    const v = snap.vitals?.['vehicle-api'];
+    if (v) {
         const pm2El = document.querySelector('[data-vital="pm2"]');
         const portEl = document.querySelector('[data-vital="port"]');
         const status = v.pm2Status ?? v.serviceStatus ?? '—';
@@ -177,22 +170,17 @@ async function init() {
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
-    if (logsRes?.ok) {
-        const logs = await logsRes.json();
-        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
-        const logBody = document.getElementById('log-body');
-        if (entries.length) {
-            logBody.innerHTML = entries.map(e => {
-                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
-                return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
-            }).join('');
-        }
+    const entries = snap.projectLogs?.['vehicle-api'];
+    if (Array.isArray(entries) && entries.length) {
+        document.getElementById('log-body').innerHTML = entries.map(e => {
+            const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+            return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
+        }).join('');
     }
 }
 
-init();
-setInterval(init, 4000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
+const stream = new EventSource(`${API}/stream?system=1&vitals=vehicle-api&projectLogs=vehicle-api&logsLimit=6&interval=1000`);
+stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>
 

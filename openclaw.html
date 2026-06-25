@@ -134,16 +134,9 @@
 <script>
 const API = 'https://server.jedbillyb.com/api';
 
-async function init() {
-    const [sysRes, vitalsRes, logsRes] = await Promise.all([
-        fetch(`${API}/system`).catch(() => null),
-        fetch(`${API}/projects/openclaw/vitals`).catch(() => null),
-        fetch(`${API}/projects/openclaw/logs?limit=7`).catch(() => null),
-    ]);
-
-    if (sysRes?.ok) {
-        const sys = await sysRes.json();
-        const load = sys.cpu?.load?.[0];
+function apply(snap) {
+    if (snap.system) {
+        const load = snap.system.cpu?.load?.[0];
         if (load != null) {
             const pct = load.toFixed(1) + '%';
             document.querySelector('[data-vital="cpu"]').textContent = pct;
@@ -151,29 +144,24 @@ async function init() {
         }
     }
 
-    if (vitalsRes?.ok) {
-        const v = await vitalsRes.json();
+    const v = snap.vitals?.openclaw;
+    if (v) {
         if (v.model) document.querySelector('[data-vital="model"]').textContent = v.model;
         if (v.memoryFiles != null) document.querySelector('[data-vital="memory"]').textContent = v.memoryFiles + ' .md';
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
-    if (logsRes?.ok) {
-        const logs = await logsRes.json();
-        const entries = Array.isArray(logs) ? logs : (logs.logs ?? []);
-        const logBody = document.getElementById('log-body');
-        if (entries.length) {
-            logBody.innerHTML = entries.map(e => {
-                const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
-                return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
-            }).join('');
-        }
+    const entries = snap.projectLogs?.openclaw;
+    if (Array.isArray(entries) && entries.length) {
+        document.getElementById('log-body').innerHTML = entries.map(e => {
+            const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
+            return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
+        }).join('');
     }
 }
 
-init();
-setInterval(init, 4000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
+const stream = new EventSource(`${API}/stream?system=1&vitals=openclaw&projectLogs=openclaw&logsLimit=7&interval=1000`);
+stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>
 
