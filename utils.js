@@ -2,11 +2,10 @@ function esc(s) {
     return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// uses the day.js duration plugin (loaded + extended by the page) to render a
+// human-friendly uptime, e.g. "5 days", "an hour".
 function fmtUptime(s) {
-    const d = Math.floor(s / 86400);
-    const h = String(Math.floor((s % 86400) / 3600)).padStart(2, '0');
-    const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
-    return d ? `${d}d ${h}:${m}` : `${h}:${m}`;
+    return dayjs.duration(s, 'seconds').humanize();
 }
 
 function tsToTime(usec) {

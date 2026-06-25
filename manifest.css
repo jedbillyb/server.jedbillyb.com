@@ -288,3 +288,19 @@ body {
   .map-info-item:nth-child(1),
   .map-info-item:nth-child(2) { border-bottom: 1px solid #e0e0e0; }
 }
+
+/* size the third-party lucide icons inline with the stat labels */
+.stat-label svg {
+  width: 13px;
+  height: 13px;
+  vertical-align: -2px;
+  margin-right: 5px;
+  opacity: 0.6;
+}
+
+/* chart.js live-usage canvas container */
+.chart-wrap {
+  position: relative;
+  height: 150px;
+  margin-top: 8px;
+}

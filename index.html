@@ -21,7 +21,7 @@
 
     <div class="main">
         <div class="main-left">
-            <span class="breadcrumb-sub-home">// home</span>
+            <span class="breadcrumb-sub-home"><i data-lucide="home"></i>// home</span>
             <h1>server.jedbillyb.com</h1>
             <p class="breadcrumb-sub">A small self-hosted OCI running my side projects, services and experiments. Each project below runs as its own service with live status. see <a href="/manifest.html">/manifest</a> for the overall system stats, processes and combined logs.</p>
         </div>
@@ -46,7 +46,7 @@
     </div>
 </div>
 
-<span class="breadcrumb-sub-projects">// projects</span>
+<span class="breadcrumb-sub-projects"><i data-lucide="folder-git-2"></i>// projects</span>
 <div class="container">
 
     <a href="/nz-vehicle-finder.html" class="box" data-slug="vehicle-api">
@@ -116,20 +116,22 @@
 
 </div>
 
-<span class="breadcrumb-sub-recent-logs">// recent logs</span>
+<span class="breadcrumb-sub-recent-logs"><i data-lucide="scroll-text"></i>// recent logs</span>
 
 <div class="box-recent-logs" id="recent-logs"></div>
 
 <footer class="footer">jed blenkhorn · 2026</footer>
 
+<!-- third-party libs: day.js (time formatting) + lucide (icons) -->
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/relativeTime.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/duration.js"></script>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 <script src="/utils.js"></script>
 <script>
-  function fmtUptime(s) {
-    const d = Math.floor(s / 86400);
-    const h = Math.floor((s % 86400) / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
-  }
+  dayjs.extend(dayjs_plugin_relativeTime);
+  dayjs.extend(dayjs_plugin_duration);
+  lucide.createIcons();
 
   function applyStatus(d) {
     document.querySelector('.stat-row:nth-child(1) .stat-value').textContent = d.ok ? 'online' : 'degraded';
@@ -161,10 +163,11 @@
       const unit = esc((e._SYSTEMD_UNIT || e.SYSLOG_IDENTIFIER || 'unknown').replace('.service', ''));
       const msg = esc(e.MESSAGE || '');
       const ts = e.__REALTIME_TIMESTAMP ? new Date(Number(e.__REALTIME_TIMESTAMP) / 1000) : new Date();
-      const time = ts.toTimeString().slice(0, 5);
+      const time = dayjs(ts).format('HH:mm');
+      const ago = dayjs(ts).fromNow();
       const color = SERVICE_COLORS[unit] || '#4aab8a';
       return `<div class="log-row">
-        <span class="log-time">${time}</span>
+        <span class="log-time" title="${ago}">${time}</span>
         <span class="log-service" style="color:${color}">${unit}</span>
         <span class="log-msg">${msg}</span>
       </div>`;

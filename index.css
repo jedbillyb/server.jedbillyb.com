@@ -313,3 +313,13 @@ body {
     display: none;
   }
 }
+
+/* size the third-party lucide icons to match the section labels */
+.breadcrumb-sub-home svg,
+.breadcrumb-sub-projects svg,
+.breadcrumb-sub-recent-logs svg {
+  width: 13px;
+  height: 13px;
+  vertical-align: -2px;
+  margin-right: 5px;
+}

@@ -42,27 +42,32 @@
 
         <div class="stat-cards">
             <div class="stat-card">
-                <div class="stat-label">CPU</div>
+                <div class="stat-label"><i data-lucide="cpu"></i>CPU</div>
                 <div class="stat-value green" id="stat-cpu">—</div>
                 <div class="stat-bar-track"><div class="stat-bar green-bg" id="bar-cpu" style="width:0%"></div></div>
                 <div class="stat-sub" id="cpu-sub">—</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">RAM</div>
+                <div class="stat-label"><i data-lucide="memory-stick"></i>RAM</div>
                 <div class="stat-value orange" id="stat-ram">—</div>
                 <div class="stat-bar-track"><div class="stat-bar orange-bg" id="bar-ram" style="width:0%"></div></div>
                 <div class="stat-sub" id="ram-sub">—</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">UPTIME</div>
+                <div class="stat-label"><i data-lucide="clock"></i>UPTIME</div>
                 <div class="stat-value" id="stat-uptime">—</div>
                 <div class="stat-sub" id="uptime-sub">—</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">OS</div>
+                <div class="stat-label"><i data-lucide="server"></i>OS</div>
                 <div class="stat-value" id="stat-os">—</div>
                 <div class="stat-sub" id="os-sub">—</div>
             </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">// resource usage · live</div>
+            <div class="chart-wrap"><canvas id="usage-chart"></canvas></div>
         </div>
 
         <div class="map-card">
@@ -114,9 +119,53 @@
         <span>jed blenkhorn · 2026</span>
     </footer>
 
+<!-- third-party libs: chart.js (live graph), day.js (time formatting), lucide (icons) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/relativeTime.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/duration.js"></script>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 <script src="/utils.js"></script>
 <script>
+dayjs.extend(dayjs_plugin_relativeTime);
+dayjs.extend(dayjs_plugin_duration);
+lucide.createIcons();
+
 const API = 'https://server.jedbillyb.com/api';
+
+const usageChart = new Chart(document.getElementById('usage-chart'), {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            { label: 'CPU %', data: [], borderColor: '#4aab8a', backgroundColor: 'rgba(74,171,138,0.12)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 1.5 },
+            { label: 'RAM %', data: [], borderColor: '#e8a838', backgroundColor: 'rgba(232,168,56,0.12)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 1.5 },
+        ],
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: { intersect: false, mode: 'index' },
+        scales: {
+            y: { min: 0, max: 100, ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { color: '#f0f0f0' } },
+            x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }, grid: { display: false } },
+        },
+        plugins: { legend: { labels: { boxWidth: 10, font: { size: 11 } } } },
+    },
+});
+
+function pushUsage(cpu, ram) {
+    if (cpu == null && ram == null) return;
+    usageChart.data.labels.push(dayjs().format('HH:mm:ss'));
+    usageChart.data.datasets[0].data.push(cpu);
+    usageChart.data.datasets[1].data.push(ram);
+    if (usageChart.data.labels.length > 30) {
+        usageChart.data.labels.shift();
+        usageChart.data.datasets.forEach(d => d.data.shift());
+    }
+    usageChart.update();
+}
 
 async function loadLocation() {
     try {
@@ -130,23 +179,26 @@ async function loadLocation() {
 function apply(snap) {
     if (snap.system) {
         const s = snap.system;
+        let cpuPct = null, ramPct = null;
 
         const load1 = s.cpu?.load?.[0];
         const cores = s.cpu?.cores ?? 4;
         if (load1 != null) {
-            const pct = Math.min(100, load1 / cores * 100);
-            document.getElementById('stat-cpu').textContent = pct.toFixed(0) + '%';
-            document.getElementById('bar-cpu').style.width = pct.toFixed(0) + '%';
+            cpuPct = Math.min(100, load1 / cores * 100);
+            document.getElementById('stat-cpu').textContent = cpuPct.toFixed(0) + '%';
+            document.getElementById('bar-cpu').style.width = cpuPct.toFixed(0) + '%';
         }
         document.getElementById('cpu-sub').textContent = cores ? `${cores} cores` : '—';
 
         const used = s.memory?.used, total = s.memory?.total;
         if (used && total) {
-            const pct = used / total * 100;
-            document.getElementById('stat-ram').textContent = pct.toFixed(0) + '%';
-            document.getElementById('bar-ram').style.width = pct.toFixed(0) + '%';
+            ramPct = used / total * 100;
+            document.getElementById('stat-ram').textContent = ramPct.toFixed(0) + '%';
+            document.getElementById('bar-ram').style.width = ramPct.toFixed(0) + '%';
             document.getElementById('ram-sub').textContent = `${(used/1e9).toFixed(1)} / ${(total/1e9).toFixed(1)} GiB`;
         }
+
+        pushUsage(cpuPct, ramPct);
 
         if (s.uptime) {
             const fmt = fmtUptime(s.uptime);
