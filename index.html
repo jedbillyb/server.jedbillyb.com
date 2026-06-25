@@ -184,15 +184,34 @@
 
   const slugs = [...document.querySelectorAll('[data-slug]')].map(b => b.dataset.slug);
   const logsBox = document.querySelector('.box-recent-logs');
+
   // Each .log-row is a fixed 30px (border-box, no gap) and the box has 14px
   // top + bottom padding, so the available height divides cleanly by the row
   // height — no fudge factor needed.
-  const logLimit = Math.max(3, Math.floor((logsBox.clientHeight - 28) / 30));
+  const rowsThatFit = () => Math.max(3, Math.floor((logsBox.clientHeight - 28) / 30));
 
-  const params = new URLSearchParams({ status: '1', activity: String(logLimit), interval: '2000' });
-  if (slugs.length) params.set('vitals', slugs.join(','));
-  const stream = new EventSource(`/api/stream?${params}`);
-  stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
+  let stream;
+  let lastLimit = 0;
+  function startStream() {
+    const logLimit = rowsThatFit();
+    if (logLimit === lastLimit && stream) return;
+    lastLimit = logLimit;
+    if (stream) stream.close();
+    const params = new URLSearchParams({ status: '1', activity: String(logLimit), interval: '2000' });
+    if (slugs.length) params.set('vitals', slugs.join(','));
+    stream = new EventSource(`/api/stream?${params}`);
+    stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
+  }
+
+  // Measure once now, then again after the web font loads (which reflows the
+  // layout and changes how many rows fit) and on resize.
+  startStream();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(startStream);
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(startStream, 200);
+  });
 </script>
 
 </body>
