@@ -1,0 +1,3 @@
+- Consider live polling
+- Fix mc project page
+- Fix manifest docker section
