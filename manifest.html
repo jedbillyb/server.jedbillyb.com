@@ -138,8 +138,8 @@ const usageChart = new Chart(document.getElementById('usage-chart'), {
     data: {
         labels: [],
         datasets: [
-            { label: 'CPU %', data: [], borderColor: '#4aab8a', backgroundColor: 'rgba(74,171,138,0.12)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 1.5 },
-            { label: 'RAM %', data: [], borderColor: '#e8a838', backgroundColor: 'rgba(232,168,56,0.12)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 1.5 },
+            { label: 'CPU %', yAxisID: 'yCpu', data: [], borderColor: '#4aab8a', backgroundColor: 'rgba(74,171,138,0.12)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 1.5 },
+            { label: 'RAM %', yAxisID: 'yRam', data: [], borderColor: '#e8a838', backgroundColor: 'rgba(232,168,56,0.12)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 1.5 },
         ],
     },
     options: {
@@ -148,7 +148,8 @@ const usageChart = new Chart(document.getElementById('usage-chart'), {
         animation: false,
         interaction: { intersect: false, mode: 'index' },
         scales: {
-            y: { grace: '25%', ticks: { callback: v => v.toFixed(0) + '%', font: { size: 10 } }, grid: { color: '#f0f0f0' } },
+            yCpu: { position: 'left', min: 0, grace: '30%', ticks: { callback: v => v.toFixed(0) + '%', font: { size: 10 }, color: '#4aab8a' }, grid: { color: '#f0f0f0' } },
+            yRam: { position: 'right', min: 0, grace: '30%', ticks: { callback: v => v.toFixed(0) + '%', font: { size: 10 }, color: '#e8a838' }, grid: { display: false } },
             x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }, grid: { display: false } },
         },
         plugins: { legend: { labels: { boxWidth: 10, font: { size: 11 } } } },
