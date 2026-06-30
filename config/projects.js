@@ -113,7 +113,7 @@ export const projects = [
     slug: 'server-api',
     name: 'Server API',
     description: 'server.jedbillyb.com REST API server',
-    service: 'server-api.service',
+    pm2: 'server-api',
     port: 4001,
     path: '/home/ubuntu/server-api',
     url: 'https://server.jedbillyb.com/api/status',
