@@ -39,7 +39,10 @@ router.get('/', (req, res) => {
   
   
   
-  const TASK_TIMEOUT = 1500;
+  
+  
+  
+  const TASK_TIMEOUT = 3000;
   const withTimeout = p => Promise.race([
     p,
     new Promise(resolve => setTimeout(resolve, TASK_TIMEOUT)),
