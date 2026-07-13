@@ -1,3 +1,4 @@
+/* page background and base font */
 body {
   overscroll-behavior: none;
   background-color: #f0f0f0;
@@ -8,11 +9,13 @@ body {
   min-height: 100vh;
 }
 
+/* big white box at the top holding the navigation bar and heading */
 .card {
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
 }
 
+/* navigation bar, link/logo on the left and external links pushed to the right */
 .header {
   text-decoration: none;
   display: flex;
@@ -23,28 +26,33 @@ body {
   border-bottom: 1px solid #e0e0e0;
 }
 
+/* black text links in the navigation bar */
 .header a {
   color: black;
   text-decoration: none;
   font-size: 14px;
 }
 
+/* greyed out links on the right of the navigation bar */
 .header-right a {
   color: #7A8593;
 }
 
+/* bold link/logo text */
 .header a.logo {
   font-weight: bold;
   font-size: 14px;
   text-decoration: none;
 }
 
+/* left side of the navigation bar */
 .header-left {
   display: flex;
   gap: 8px;
   align-items: center;
 }
 
+/* right side of the navigation bar, spaces the links out */
 .header-right {
   text-decoration: none;
   display: flex;
@@ -53,6 +61,7 @@ body {
   color: #7a9391;
 }
 
+/* the site name on the left of the navigation bar */
 .header a.breadcrumb {
   text-decoration: none;
   font-family: "JetBrains Mono", monospace;
@@ -60,10 +69,12 @@ body {
   color: #1A2332;
 }
 
+/* fade links when cursor is hovered over them */
 .header a:hover {
   opacity: 0.6;
 }
 
+/* heading area, title on the left and stats on the right */
 .main {
   display: flex;
   justify-content: space-between;
@@ -71,18 +82,21 @@ body {
   gap: 40px;
 }
 
+/* the main heading */
 .main-left h1 {
   font-size: 36px;
   font-weight: bold;
   margin: 8px 0 0 0;
 }
 
+/* "// home" label above the title */
 .breadcrumb-sub-home {
   display: block;
   font-size: 13px;
   color: #5B9BD5;
 }
 
+/* description paragraph under the title */
 .breadcrumb-sub {
   max-width: 620px;
   margin: 16px 0 0 0;
@@ -91,6 +105,7 @@ body {
   color: #7A8593;
 }
 
+/* links inside the description paragraph */
 .breadcrumb-sub a {
   color: #5B9BD5;
   text-decoration: none;
@@ -100,6 +115,7 @@ body {
   opacity: 0.6;
 }
 
+/* "// projects" label */
 .breadcrumb-sub-projects {
   display: block;
   font-size: 13px;
@@ -109,6 +125,7 @@ body {
   margin-bottom: -20px;
 }
 
+/* "// recent logs" label above the log feed */
 .breadcrumb-sub-recent-logs {
   display: block;
   font-size: 13px;
@@ -118,6 +135,7 @@ body {
   margin-bottom: 8px;
 }
 
+/* the right-hand column containing the stats */
 .main-right {
   display: flex;
   flex-direction: column;
@@ -125,6 +143,7 @@ body {
   min-width: 320px;
 }
 
+/* one row in the stats column */
 .stat-row {
   display: flex;
   justify-content: space-between;
@@ -133,16 +152,19 @@ body {
   font-size: 14px;
 }
 
+/* the name of the stat */
 .stat-label {
   color: #888;
 }
 
+/* the value of the stat */
 .stat-value {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
+/* project cards container */
 .container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -150,6 +172,7 @@ body {
   padding: 40px 20px 20px 20px;
 }
 
+/* project card with a footer */
 .box {
   background-color: #fff;
   border: 1px solid #e0e0e0;
@@ -162,14 +185,17 @@ body {
   min-height: 140px;
 }
 
+/* darken the card border when hovered */
 .box:hover {
   border-color: #aaa;
 }
 
+/* top section of the card */
 .box-top {
   flex: 1;
 }
 
+/* project name on the card */
 .box-title {
   font-size: 15px;
   font-weight: bold;
@@ -177,12 +203,14 @@ body {
   margin-bottom: 8px;
 }
 
+/* short description under the project name */
 .box-desc {
   font-size: 13px;
   color: #555;
   line-height: 1.5;
 }
 
+/* bottom row of the card, tags on the left and status on the right */
 .box-footer {
   display: flex;
   justify-content: space-between;
@@ -190,27 +218,32 @@ body {
   margin-top: 20px;
 }
 
+/* tags section */
 .box-tags {
   font-size: 12px;
   color: #888;
 }
 
+/* the running/stopped pill on the card */
 .box-status {
   font-size: 12px;
   padding: 3px 10px;
   border-radius: 20px;
 }
 
+/* green pill when the service is up */
 .box-status.running {
   background-color: #e6f4ea;
   color: #2a7a3b;
 }
 
+/* grey pill when the service is down */
 .box-status.stopped {
   background-color: #f0f0f0;
   color: #888;
 }
 
+/* the manifest card with a blue tint to stand out from the projects */
 .box-manifest {
   background-color: #E8F1F8;
 }
@@ -223,6 +256,7 @@ body {
   color: #5B9BD5;
 }
 
+/* the recent logs section */
 .box-recent-logs {
   background-color: #fff;
   border: 1px solid #e0e0e0;
@@ -238,6 +272,7 @@ body {
   overflow: hidden;
 }
 
+/* one row in the recent logs section */
 .log-row {
   display: grid;
   grid-template-columns: 48px 160px minmax(0, 1fr);
@@ -248,14 +283,17 @@ body {
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* no divider under the last log row */
 .log-row:last-child {
   border-bottom: none;
 }
 
+/* the time on the left of a log row */
 .log-time {
   color: #aaa;
 }
 
+/* the service name, cut off with "..." if too long */
 .log-service {
   font-weight: 500;
   min-width: 0;
@@ -265,6 +303,7 @@ body {
   text-overflow: ellipsis;
 }
 
+/* the log message, kept to one line and cut off with "..." */
 .log-msg {
   color: #bbb;
   min-width: 0;
@@ -273,8 +312,7 @@ body {
   text-overflow: ellipsis;
 }
 
-
-
+/* footer at the bottom of the page */
 .footer {
   background-color: #fff;
   border-top: 1px solid #e0e0e0;
@@ -284,7 +322,9 @@ body {
   color: #888;
 }
 
+/* mobile layout */
 @media (max-width: 640px) {
+  /* stack everything into one column */
   .main {
     flex-direction: column;
     gap: 20px;
@@ -295,16 +335,19 @@ body {
     min-width: unset;
   }
 
+  /* smaller title so it fits the screen */
   .main-left h1 {
     font-size: 24px;
   }
 
+  /* project cards go one per row */
   .container {
     grid-template-columns: 1fr;
     padding: 20px;
     gap: 12px;
   }
 
+  /* log lines drop the service column to make room for the message */
   .log-row {
     grid-template-columns: 44px minmax(0, 1fr);
   }

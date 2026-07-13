@@ -1,3 +1,4 @@
+/* page background and base font */
 body {
   overscroll-behavior: none;
   background-color: #f0f0f0;
@@ -8,6 +9,7 @@ body {
   min-height: 100vh;
 }
 
+/* navigation bar, link/logo on the left and external links pushed to the right */
 .header {
   display: flex;
   justify-content: space-between;
@@ -18,12 +20,14 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* black text links in the navigation bar */
 .header a {
   color: black;
   font-size: 14px;
   text-decoration: none;
 }
 
+/* left side of the navigation bar */
 .header-left {
   display: flex;
   gap: 8px;
@@ -33,11 +37,13 @@ body {
   text-decoration: none;
 }
 
+/* right side of the navigation bar, spaces the links out */
 .header-right {
   display: flex;
   gap: 20px;
 }
 
+/* the "/ project-name" part after the site name */
 .header .breadcrumb {
   text-decoration: none;
   font-weight: normal;
@@ -46,10 +52,12 @@ body {
   user-select: none;
 }
 
+/* fade links when cursor is hovered over them */
 .header a:hover {
   opacity: 0.6;
 }
 
+/* footer at the bottom of the page */
 .footer {
   margin-top: auto;
   background-color: #fff;
@@ -60,12 +68,14 @@ body {
   color: #888;
 }
 
+/* "// home" label above the title */
 .breadcrumb-sub-home {
   display: block;
   font-size: 13px;
   color: #5B9BD5;
 }
 
+/* footer has a back link on the left and the name on the right */
 .footer {
   display: flex;
   justify-content: space-between;
@@ -73,6 +83,7 @@ body {
   text-align: left;
 }
 
+/* the back link in the footer */
 .footer-back {
   color: #888;
   text-decoration: none;
@@ -83,11 +94,13 @@ body {
   opacity: 0.7;
 }
 
+/* main content area */
 .project-page {
   flex: 1;
   padding: 24px 20px;
 }
 
+/* top of the page, title on the left and the status on the right */
 .project-top {
   display: flex;
   justify-content: space-between;
@@ -95,12 +108,14 @@ body {
   margin-bottom: 16px;
 }
 
+/* small grey label above the project title */
 .project-label {
   font-size: 12px;
   color: #999;
   margin-bottom: 6px;
 }
 
+/* the project name */
 .project-title {
   font-size: 30px;
   font-weight: 700;
@@ -108,11 +123,13 @@ body {
   margin: 0 0 4px 0;
 }
 
+/* the description under the project name */
 .project-subtitle {
   font-size: 13px;
   color: #999;
 }
 
+/* green "running" pill in the top right */
 .project-status {
   display: flex;
   align-items: center;
@@ -125,6 +142,7 @@ body {
   white-space: nowrap;
 }
 
+/* the little green dot inside the running pill */
 .status-dot {
   width: 6px;
   height: 6px;
@@ -133,12 +151,14 @@ body {
   flex-shrink: 0;
 }
 
+/* row of buttons linking to the repo, live site, etc */
 .project-links {
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
 }
 
+/* one of those link buttons */
 .project-link {
   font-size: 13px;
   text-decoration: none;
@@ -153,10 +173,12 @@ body {
   background: #f5f5f5;
 }
 
+/* the greyed-out label part inside of a link button */
 .link-tag {
   color: #888;
 }
 
+/* main content grid */
 .project-grid {
   display: grid;
   grid-template-columns: 3fr 2fr;
@@ -164,6 +186,7 @@ body {
   align-items: start;
 }
 
+/* the left and right columns of cards */
 .project-col-left,
 .project-col-right {
   display: flex;
@@ -171,6 +194,7 @@ body {
   gap: 16px;
 }
 
+/* white box used for each section of the page */
 .card {
   background: #fff;
   border: 1px solid #e0e0e0;
@@ -178,6 +202,7 @@ body {
   overflow: hidden;
 }
 
+/* the small grey title bar at the top of a card */
 .card-header {
   font-size: 12px;
   color: #999;
@@ -185,6 +210,7 @@ body {
   border-bottom: 1px solid #e0e0e0;
 }
 
+/* the description of the project */
 .description-body {
   padding: 14px 16px;
   font-size: 13px;
@@ -196,16 +222,19 @@ body {
   margin: 0;
 }
 
+/* space between paragraphs */
 .description-body p + p {
   margin-top: 10px;
 }
 
+/* stack table */
 .stack-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
 
+/* the rows of the stack table */
 .stack-table tr {
   border-bottom: 1px solid #f0f0f0;
 }
@@ -214,6 +243,7 @@ body {
   border-bottom: none;
 }
 
+/* left column of the stack table */
 .stack-key {
   color: #999;
   padding: 9px 16px;
@@ -223,12 +253,14 @@ body {
   vertical-align: middle;
 }
 
+/* right column of the stack table */
 .stack-val {
   padding: 9px 16px;
   color: #222;
   vertical-align: middle;
 }
 
+/* vitals grid */
 .vitals-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -236,29 +268,35 @@ body {
   gap: 16px;
 }
 
+/* the name of a vital */
 .vital-label {
   font-size: 11px;
   color: #999;
   margin-bottom: 3px;
 }
 
+/* the number itself */
 .vital-value {
   font-size: 22px;
   color: #222;
 }
 
+/* green when the value is healthy */
 .vital-green {
   color: #22c55e;
 }
 
+/* red when something is wrong */
 .vital-red {
   color: #e05c5c;
 }
 
+/* bigger text for the vital */
 .vital-value-lg {
   font-size: 36px;
 }
 
+/* grey version of the status pill, used when the service is down */
 .project-status-stopped {
   display: flex;
   align-items: center;
@@ -271,6 +309,7 @@ body {
   white-space: nowrap;
 }
 
+/* the grey dot inside the stopped pill */
 .status-dot-stopped {
   width: 6px;
   height: 6px;
@@ -279,6 +318,7 @@ body {
   flex-shrink: 0;
 }
 
+/* the log feed inside the logs card */
 .log-body {
   padding: 10px 16px;
   display: flex;
@@ -286,21 +326,25 @@ body {
   gap: 5px;
 }
 
+/* one log line, time then message */
 .log-line {
   font-size: 12px;
   display: flex;
   gap: 12px;
 }
 
+/* the time on the left of a log line */
 .log-time {
   color: #999;
   min-width: 32px;
 }
 
+/* the log message */
 .log-text {
   color: #bbb;
 }
 
+/* colour a log line */
 .log-green .log-text {
   color: #4ec994;
 }
@@ -313,12 +357,14 @@ body {
   color: #e05c5c;
 }
 
+/* row of links to the other projects at the bottom of the page */
 .other-projects {
   padding: 12px 16px;
   display: flex;
   gap: 20px;
 }
 
+/* one of those project links */
 .other-project-link {
   font-size: 13px;
   color: #5B9BD5;
@@ -329,16 +375,20 @@ body {
   opacity: 0.7;
 }
 
+/* mobile layout */
 @media (max-width: 700px) {
+  /* project grid goes one column instead of two */
   .project-grid {
     grid-template-columns: 1fr;
   }
 
+  /* title and status pill stack instead of going side by side */
   .project-top {
     flex-direction: column;
     gap: 12px;
   }
 
+  /* link buttons stack on top of each other */
   .project-links {
     flex-direction: column;
   }

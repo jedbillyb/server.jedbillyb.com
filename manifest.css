@@ -1,7 +1,9 @@
+/* stop the page bouncing when you scroll past the bottom */
 html, body {
   overscroll-behavior: none;
 }
 
+/* page background and base font */
 body {
   background: #f0f0f0;
   margin: 0;
@@ -12,6 +14,7 @@ body {
 }
 
 
+/* navigation bar, link/logo on the left and external links pushed to the right */
 .header {
   display: flex;
   justify-content: space-between;
@@ -21,6 +24,7 @@ body {
   border-bottom: 1px solid #e0e0e0;
 }
 
+/* black text links in the navigation bar */
 .header a {
   color: black;
   text-decoration: none;
@@ -28,6 +32,7 @@ body {
   font-family: inherit;
 }
 
+/* left side of the navigation bar */
 .header-left {
   display: flex;
   gap: 8px;
@@ -35,16 +40,20 @@ body {
   font-weight: bold;
 }
 
+/* the "/manifest" part after the site name */
 .breadcrumb { font-weight: normal; }
 
+/* right side of the navigation bar, spaces the links out */
 .header-right {
   display: flex;
   gap: 20px;
 }
 
+/* fade links when cursor is hovered over them */
 .header a:hover { opacity: 0.6; }
 
 
+/* green strip under the navigation bar saying whether the server is healthy */
 .status-banner {
   display: flex;
   justify-content: space-between;
@@ -56,12 +65,14 @@ body {
   color: #2a7a4a;
 }
 
+/* dot and text on the left of the banner */
 .banner-left {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+/* the green dot in the banner */
 .banner-dot {
   width: 9px;
   height: 9px;
@@ -70,18 +81,24 @@ body {
   flex-shrink: 0;
 }
 
+/* dot turns orange when something needs attention */
 .banner-dot.warn { background: #e5a020; }
 
+/* the bold line of the banner */
 .banner-title {
   font-size: 13px;
   font-weight: bold;
   margin-bottom: 2px;
 }
 
+/* the faded second line of the banner */
 .banner-sub { opacity: 0.75; }
+
+/* the faded text on the right of the banner */
 .banner-right { opacity: 0.85; }
 
 
+/* the main content area */
 .page {
   flex: 1;
   padding: 24px 20px;
@@ -90,12 +107,14 @@ body {
   gap: 16px;
 }
 
+/* the page title */
 .page-title {
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 4px 0;
 }
 
+/* the subtitle under the page title */
 .page-sub {
   font-size: 13px;
   color: #999;
@@ -103,12 +122,14 @@ body {
 }
 
 
+/* the grid of main stat cards */
 .stat-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 
+/* one stat card */
 .stat-card {
   background: #fff;
   border: 1px solid #e0e0e0;
@@ -116,6 +137,7 @@ body {
   padding: 16px;
 }
 
+/* the name of the stat */
 .stat-label {
   font-size: 10px;
   color: #999;
@@ -123,6 +145,7 @@ body {
   margin-bottom: 6px;
 }
 
+/* the big number on the stat card */
 .stat-value {
   font-size: 28px;
   font-weight: 600;
@@ -131,6 +154,7 @@ body {
   line-height: 1;
 }
 
+/* the track the progress bar sits in */
 .stat-bar-track {
   height: 3px;
   background: #eee;
@@ -138,18 +162,21 @@ body {
   margin-bottom: 8px;
 }
 
+/* the filled part of the progress bar */
 .stat-bar {
   height: 3px;
   border-radius: 2px;
   transition: width 0.4s;
 }
 
+/* the small print under the bar */
 .stat-sub {
   font-size: 11px;
   color: #999;
 }
 
 
+/* colours reused across the page for text and bars */
 .green { color: #22c55e; }
 .orange { color: #e5a020; }
 .blue { color: #5B9BD5; }
@@ -158,6 +185,7 @@ body {
 .orange-bg { background: #e5a020; }
 
 
+/* the card holding the map */
 .map-card {
   background: #fff;
   border: 1px solid #e0e0e0;
@@ -168,6 +196,7 @@ body {
   flex: 1;
 }
 
+/* the embedded map itself */
 .map-frame {
   width: 100%;
   min-height: 200px;
@@ -176,12 +205,14 @@ body {
   display: block;
 }
 
+/* details about the server sitting under the map */
 .map-info {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid #e0e0e0;
 }
 
+/* one of those details, with a divider between */
 .map-info-item {
   padding: 12px 16px;
   border-right: 1px solid #e0e0e0;
@@ -189,6 +220,7 @@ body {
 
 .map-info-item:last-child { border-right: none; }
 
+/* the name of the detail */
 .map-key {
   font-size: 10px;
   color: #999;
@@ -196,12 +228,14 @@ body {
   margin-bottom: 4px;
 }
 
+/* the value of the detail */
 .map-val {
   font-size: 13px;
   color: #333;
 }
 
 
+/* white box used for each section of the page */
 .card {
   background: #fff;
   border: 1px solid #e0e0e0;
@@ -209,6 +243,7 @@ body {
   overflow: hidden;
 }
 
+/* the small grey title bar at the top of a card */
 .card-header {
   font-size: 12px;
   color: #999;
@@ -216,6 +251,7 @@ body {
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* two-column layout */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -224,12 +260,14 @@ body {
 }
 
 
+/* the tables listing services, docker containers and top processes */
 .data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
 
+/* the column headings */
 .data-table th {
   text-align: left;
   font-size: 10px;
@@ -240,6 +278,7 @@ body {
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* the data cells */
 .data-table td {
   padding: 8px 16px;
   border-bottom: 1px solid #f5f5f5;
@@ -248,10 +287,11 @@ body {
 
 .data-table tr:last-child td { border-bottom: none; }
 
-/* keep the docker STATE column on one line ("Up 12 days (healthy)") */
+/* keep the docker STATE column on one line */
 .docker-table th:nth-child(3),
 .docker-table td:nth-child(3) { white-space: nowrap; }
 
+/* the little dot in front of a service name */
 .dot {
   display: inline-block;
   width: 7px;
@@ -261,10 +301,12 @@ body {
   vertical-align: middle;
 }
 
+/* green if the service is running, grey if it isn't */
 .dot.green { background: #22c55e; }
 .dot.grey { background: #aaa; }
 
 
+/* footer at the bottom of the page */
 .footer {
   background: #fff;
   border-top: 1px solid #e0e0e0;
@@ -277,6 +319,7 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* the back link in the footer */
 .footer-back {
   color: #888;
   text-decoration: none;
@@ -284,9 +327,15 @@ body {
 
 .footer-back:hover { opacity: 0.7; }
 
+/* mobile layout */
 @media (max-width: 700px) {
+  /* stat cards, two per row */
   .stat-cards { grid-template-columns: 1fr 1fr; }
+
+  /* two-column layout */
   .two-col { grid-template-columns: 1fr; }
+
+  /* the map details */
   .map-info { grid-template-columns: 1fr 1fr; }
   .map-info-item:nth-child(2) { border-right: none; }
   .map-info-item:nth-child(1),
@@ -302,7 +351,7 @@ body {
   opacity: 0.6;
 }
 
-/* chart.js live-usage canvas container */
+/* chart container */
 .chart-wrap {
   position: relative;
   height: 150px;
