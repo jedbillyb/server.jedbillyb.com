@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- website title, icon and stylesheet -->
 <head>
     <meta charset="UTF-8">
     <title>manifest · server.jedbillyb.com</title>
@@ -9,11 +10,14 @@
 </head>
 
 <body>
+    <!-- row of links across the navigation bar -->
     <div class="header">
         <div class="header-left">
+        <!-- logo/link to home on the left side of navigation bar -->
             <a href="/">server.jedbillyb.com</a>
             <span class="breadcrumb">/ manifest</span>
         </div>
+        <!-- links on the right of navigation bar -->
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
@@ -21,6 +25,7 @@
         </div>
     </div>
 
+    <!-- green/amber banner saying if everything is ok -->
     <div class="status-banner">
         <div class="banner-left">
             <span class="banner-dot" id="banner-dot"></span>
@@ -35,11 +40,14 @@
     </div>
 
     <main class="page">
+
+        <!-- page title -->
         <div class="page-title-block">
             <h1 class="page-title">server manifest</h1>
             <p class="page-sub">overview of everything running on the box.</p>
         </div>
 
+        <!-- four boxes: cpu, ram, uptime, os. the "—" fills in once the page loads -->
         <div class="stat-cards">
             <div class="stat-card">
                 <div class="stat-label"><i data-lucide="cpu"></i>CPU</div>
@@ -65,11 +73,13 @@
             </div>
         </div>
 
+        <!-- live cpu and ram graph, drawn by chart.js -->
         <div class="card">
             <div class="card-header">// resource usage · live</div>
             <div class="chart-wrap"><canvas id="usage-chart"></canvas></div>
         </div>
 
+        <!-- google map of where the server physically is -->
         <div class="map-card">
             <div class="card-header">// server physical location</div>
             <iframe
@@ -80,6 +90,7 @@
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade">
             </iframe>
+            <!-- server details under the map -->
             <div class="map-info">
                 <div class="map-info-item"><div class="map-key">HOST</div><div class="map-val">cloud vps</div></div>
                 <div class="map-info-item"><div class="map-key">REGION</div><div class="map-val" id="map-region">—</div></div>
@@ -88,6 +99,7 @@
             </div>
         </div>
 
+        <!-- table of docker containers, rows fill in once the page loads -->
         <div class="card">
             <div class="card-header">// docker containers</div>
             <table class="data-table docker-table">
@@ -96,7 +108,10 @@
             </table>
         </div>
 
+        <!-- two tables side by side -->
         <div class="two-col">
+
+            <!-- services and whether each one is up -->
             <div class="card">
                 <div class="card-header">// key services</div>
                 <table class="data-table">
@@ -104,6 +119,7 @@
                     <tbody id="services-body"><tr><td colspan="3">loading…</td></tr></tbody>
                 </table>
             </div>
+            <!-- the 8 busiest processes -->
             <div class="card">
                 <div class="card-header">// top processes · by cpu</div>
                 <table class="data-table">
@@ -114,6 +130,7 @@
         </div>
     </main>
 
+    <!-- footer of the page -->
     <footer class="footer">
         <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
         <span>jed blenkhorn · 2026</span>
@@ -127,12 +144,16 @@
 <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 <script src="/utils.js"></script>
 <script>
+// helpers for formatting uptime and memory sizes
 dayjs.extend(dayjs_plugin_relativeTime);
 dayjs.extend(dayjs_plugin_duration);
 lucide.createIcons();
 
+// where all the live data comes from, the server's Api
 const API = 'https://server.jedbillyb.com/api';
 
+// logic of the cpu and ram graph. cpu is green on the left, ram is orange on the right,
+// each with its own scale so both lines stay readable
 const usageChart = new Chart(document.getElementById('usage-chart'), {
     type: 'line',
     data: {
@@ -156,6 +177,7 @@ const usageChart = new Chart(document.getElementById('usage-chart'), {
     },
 });
 
+// add a new point to the graph. only the last 30 are kept, so the oldest points are removed as new ones arrive
 function pushUsage(cpu, ram) {
     if (cpu == null && ram == null) return;
     usageChart.data.labels.push(dayjs().format('HH:mm:ss'));
@@ -168,6 +190,7 @@ function pushUsage(cpu, ram) {
     usageChart.update();
 }
 
+// fetch the server's ip address for the box under the map
 async function loadLocation() {
     try {
         const r = await fetch(`${API}/system/location`);
@@ -177,11 +200,15 @@ async function loadLocation() {
     } catch {}
 }
 
+// logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
 function apply(snap) {
+
+    // top stat boxes, the banner and the graph
     if (snap.system) {
         const s = snap.system;
         let cpuPct = null, ramPct = null;
 
+        // turn the load number into a percentage of the cores available
         const load1 = s.cpu?.load?.[0];
         const cores = s.cpu?.cores ?? 4;
         if (load1 != null) {
@@ -191,6 +218,7 @@ function apply(snap) {
         }
         document.getElementById('cpu-sub').textContent = cores ? `${cores} cores` : '—';
 
+        // ram used out of total, shown as a percentage
         const used = s.memory?.used, total = s.memory?.total;
         if (used && total) {
             ramPct = used / total * 100;
@@ -199,8 +227,10 @@ function apply(snap) {
             document.getElementById('ram-sub').textContent = `${(used/1e9).toFixed(1)} / ${(total/1e9).toFixed(1)} GiB`;
         }
 
+        // send the two numbers worked out above to the graph
         pushUsage(cpuPct, ramPct);
 
+        // how long the server has been up, plus the date since last boot
         if (s.uptime) {
             const fmt = fmtUptime(s.uptime);
             document.getElementById('stat-uptime').textContent = fmt;
@@ -208,20 +238,24 @@ function apply(snap) {
             document.getElementById('uptime-sub').textContent = 'since ' + new Date(Date.now() - s.uptime*1000).toISOString().slice(0,10);
         }
 
+        // the os name shows in two places, the stat box and under the map
         if (s.platform) { document.getElementById('stat-os').textContent = s.platform; document.getElementById('map-os').textContent = s.platform; }
         if (s.arch) document.getElementById('os-sub').textContent = s.arch;
         if (s.cpu?.load) document.getElementById('banner-load').textContent = s.cpu.load.map(l=>l.toFixed(2)).join(' ');
     }
 
+    // the services table and the line of text in the banner
     if (snap.services && snap.projects) {
         const allServices = Array.isArray(snap.services) ? snap.services : (snap.services.services ?? []);
         const projects = Array.isArray(snap.projects) ? snap.projects : [];
 
+        // count what's up and what isn't. if anything is down the banner dot goes amber
         const running = allServices.filter(s => s.active === 'active').length;
         const stopped = allServices.length - running;
         document.getElementById('banner-sub').textContent = `${running} services running · ${stopped} stopped · last incident 12d ago`;
         if (stopped > 0) { document.getElementById('banner-dot').className = 'banner-dot warn'; }
 
+        // build one table row per project, with a green or grey dot next to it
         const serviceMap = Object.fromEntries(allServices.map(s => [s.unit, s]));
         const keyServices = projects.filter(p => p.service).map(p => {
             const s = serviceMap[p.service] ?? {};
@@ -235,9 +269,11 @@ function apply(snap) {
         document.getElementById('services-body').innerHTML = keyServices.join('') || '<tr><td colspan="3">no data</td></tr>';
     }
 
+    // the 8 busiest processes
     if (snap.processes) {
         const procs = snap.processes;
         document.getElementById('procs-body').innerHTML = procs.slice(0,8).map(p => {
+            // commands come through as a long path, so pull out just the program name
             const tokens = (p.command ?? '').split(/\s+/).filter(Boolean);
             const name = tokens.map(t => t.split('/').pop()).find(t => t && !t.startsWith('-') && !/^\d+$/.test(t) && t !== '--') ?? tokens[0]?.split('/').pop() ?? '—';
             const cpu = p.cpu != null ? p.cpu.toFixed(1)+'%' : '—';
@@ -246,9 +282,11 @@ function apply(snap) {
         }).join('') || '<tr><td colspan="3">no data</td></tr>';
     }
 
+    // the docker containers table
     if (snap.docker) {
         const list = Array.isArray(snap.docker) ? snap.docker : (snap.docker.containers ?? []);
         document.getElementById('docker-body').innerHTML = list.map(c => {
+            // docker writes its status as text like "Up 3 days", so anything starting with "up" is running
             const up = String(c.status ?? '').toLowerCase().startsWith('up');
             const ports = typeof c.ports === 'string' ? c.ports : (c.ports ?? []).join(', ');
             return `<tr>
@@ -261,6 +299,7 @@ function apply(snap) {
     }
 }
 
+// starts everything once the page loads. the connection to the server is then opened, updating every 2 seconds
 document.getElementById('map-region').textContent = 'silverwater, nsw';
 loadLocation();
 const stream = new EventSource(`${API}/stream?system=1&services=1&projects=1&processes=8&docker=1&interval=2000`);

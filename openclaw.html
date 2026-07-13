@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- website title, icon and stylesheet -->
 <head>
     <meta charset="UTF-8">
     <title>openclaw · server.jedbillyb.com</title>
@@ -9,11 +10,14 @@
 </head>
 
 <body>
+    <!-- row of links across the navigation bar -->
     <div class="header">
         <div class="header-left">
+        <!-- logo/link to home on the left side of navigation bar -->
             <a href="/">server.jedbillyb.com</a>
             <span class="breadcrumb">/ openclaw</span>
         </div>
+        <!-- links on the right of navigation bar -->
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
@@ -22,26 +26,34 @@
     </div>
 
     <main class="project-page">
+
+        <!-- project name on the left, running/stopped on the right -->
         <div class="project-top">
             <div class="project-meta">
                 <div class="project-label">// project</div>
                 <h1 class="project-title">openclaw</h1>
                 <div class="project-subtitle">open-source personal ai agent</div>
             </div>
+            <!-- project status and tags -->
             <div class="project-status">
                 <span class="status-dot"></span>
                 running · gateway.service · <span id="cpu-status">~1% cpu</span>
             </div>
         </div>
 
+        <!-- links out to the source code -->
         <div class="project-links">
             <a href="https://github.com/openclaw/openclaw" target="_blank" class="project-link">
                 github ↗ <span class="link-tag">/openclaw/openclaw</span>
             </a>
         </div>
 
+        <!-- two columns: description on the left, vitals on the right -->
         <div class="project-grid">
+
             <div class="project-col-left">
+
+                <!-- what the project is -->
                 <div class="card">
                     <div class="card-header">// description</div>
                     <div class="description-body">
@@ -49,6 +61,7 @@
                     </div>
                 </div>
 
+                <!-- what it is built with -->
                 <div class="card">
                     <div class="card-header">// stack</div>
                     <table class="stack-table">
@@ -84,7 +97,10 @@
                 </div>
             </div>
 
+            <!-- right column, fills in once the page loads -->
             <div class="project-col-right">
+
+                <!-- four live vitals, cpu is the entire server's and "memory" is how many memory files it has -->
                 <div class="card">
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
@@ -107,6 +123,7 @@
                     </div>
                 </div>
 
+                <!-- last few lines of the log -->
                 <div class="card">
                     <div class="card-header">// recent log</div>
                     <div class="log-body" id="log-body">
@@ -114,6 +131,7 @@
                     </div>
                 </div>
 
+                <!-- links to the other project pages -->
                 <div class="card">
                     <div class="card-header">// other projects</div>
                     <div class="other-projects">
@@ -125,16 +143,22 @@
         </div>
     </main>
 
+    <!-- footer of the page -->
     <footer class="footer">
         <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
         <span>jed blenkhorn · 2026</span>
     </footer>
 
+<!-- shared helpers used by the script below -->
 <script src="/utils.js"></script>
 <script>
+// where all the live data comes from, the server's Api
 const API = 'https://server.jedbillyb.com/api';
 
+// logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
 function apply(snap) {
+
+    // cpu is the entire server's, and shows in two places: the vitals box and the badge up top
     if (snap.system) {
         const load = snap.system.cpu?.load?.[0];
         if (load != null) {
@@ -144,6 +168,7 @@ function apply(snap) {
         }
     }
 
+    // openclaw's own vitals: which model it's using, how many memory files it has, and its ram
     const v = snap.vitals?.openclaw;
     if (v) {
         if (v.model) document.querySelector('[data-vital="model"]').textContent = v.model;
@@ -151,6 +176,7 @@ function apply(snap) {
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
+    // rebuild the log box, one line per entry with the time on the left and the message on the right
     const entries = snap.projectLogs?.openclaw;
     if (Array.isArray(entries) && entries.length) {
         document.getElementById('log-body').innerHTML = entries.map(e => {
@@ -160,6 +186,7 @@ function apply(snap) {
     }
 }
 
+// open the live connection from the server and ask for the last 7 lines of the log, updating every second
 const stream = new EventSource(`${API}/stream?system=1&vitals=openclaw&projectLogs=openclaw&logsLimit=7&interval=1000`);
 stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- website title, icon and stylesheet -->
 <head>
     <title>server.jedbillyb.com</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -9,9 +10,14 @@
 </head>
 
 <body>
+    <!-- big box at the top of page -->
     <div class="card">
+
+    <!-- row of links across the navigation bar -->
     <div class="header">
+        <!-- logo/link to home on the left side of navigation bar -->
         <a class="breadcrumb" href="/">server.jedbillyb.com</a>
+        <!-- links on the right of navigation bar -->
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
@@ -19,12 +25,16 @@
         </div>
     </div>
 
+    <!-- main heading area -->
     <div class="main">
+
+        <!-- title and intro paragraph -->
         <div class="main-left">
             <span class="breadcrumb-sub-home"><i data-lucide="home"></i>// home</span>
             <h1>server.jedbillyb.com</h1>
             <p class="breadcrumb-sub">A small self-hosted OCI running my side projects, services and experiments. Each project below runs as its own service with live status. see <a href="/manifest.html">/manifest</a> for the overall system stats, processes and combined logs.</p>
         </div>
+        <!-- server stats where the "--" fills in once the page loads -->
         <div class="main-right">
             <div class="stat-row">
                 <span class="stat-label">status</span>
@@ -46,6 +56,7 @@
     </div>
 </div>
 
+<!-- individual card per project -->
 <span class="breadcrumb-sub-projects"><i data-lucide="folder-git-2"></i>// projects</span>
 <div class="container">
 
@@ -54,6 +65,7 @@
             <div class="box-title">nz-vehicle-finder</div>
             <div class="box-desc">search tool for the nz motor vehicle register.</div>
         </div>
+        <!-- descriptive tags on the left, operating status on the right -->
         <div class="box-footer">
             <span class="box-tags">react · sqlite · express</span>
             <span class="box-status"></span>
@@ -104,6 +116,7 @@
         </div>
     </a>
 
+    <!-- manifest card -->
     <a href="/manifest.html" class="box box-manifest">
         <div class="box-top">
             <div class="box-title">/manifest</div>
@@ -118,8 +131,10 @@
 
 <span class="breadcrumb-sub-recent-logs"><i data-lucide="scroll-text"></i>// recent logs</span>
 
+<!-- live log feed, fills itself in automaticly -->
 <div class="box-recent-logs" id="recent-logs"></div>
 
+<!-- footer of the page -->
 <footer class="footer">jed blenkhorn · 2026</footer>
 
 <!-- third-party libs: day.js (time formatting) + lucide (icons) -->
@@ -128,11 +143,15 @@
 <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/duration.js"></script>
 <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 <script src="/utils.js"></script>
+
+<!-- page-specific script -->
 <script>
+  // helpers for formatting uptime and memory sizes
   dayjs.extend(dayjs_plugin_relativeTime);
   dayjs.extend(dayjs_plugin_duration);
   lucide.createIcons();
 
+  // code to fill in the four stats in the top right of the page, and the last incident time
   function applyStatus(d) {
     document.querySelector('.stat-row:nth-child(1) .stat-value').textContent = d.ok ? 'online' : 'degraded';
     document.querySelector('.stat-row:nth-child(2) .stat-value').textContent = fmtUptime(d.uptime);
@@ -142,22 +161,27 @@
       d.failedServices === 0 ? 'none' : 'now';
   }
 
+  // code to put running or stopped in the corner of each project card
   function applyVitals(box, d) {
+    // status counts as running if the service is up, or pm2 says online, or its port is open
     const up = d.serviceStatus === 'active' || d.pm2Status === 'online' || d.portListening === true;
     const el = box.querySelector('.box-status');
     el.textContent = up ? 'running' : 'stopped';
     el.classList.add(up ? 'running' : 'stopped');
   }
 
+  // colour for each service name in the log feed, everything else gets the default green
   const SERVICE_COLORS = {
     'profile-server': '#5B9BD5',
     'docker': '#e8a838',
   };
 
+  // make text safe to drop into the page so log lines can't inject html
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  // build the log feed, one row per line
   function applyActivity(entries) {
     document.getElementById('recent-logs').innerHTML = entries.map(e => {
       const unit = esc((e._SYSTEMD_UNIT || e.SYSLOG_IDENTIFIER || 'unknown').replace('.service', ''));
@@ -174,9 +198,11 @@
     }).join('');
   }
 
+  // runs every time new data arrives from Api
   function apply(snap) {
     if (snap.status) applyStatus(snap.status);
     if (snap.vitals) {
+      // match each card to its data using the corresponding data-slug on the card
       document.querySelectorAll('[data-slug]').forEach(box => {
         const d = snap.vitals[box.dataset.slug];
         if (d) applyVitals(box, d);
@@ -185,14 +211,15 @@
     if (Array.isArray(snap.activity)) applyActivity(snap.activity);
   }
 
+  // list of the projects on the page, used to ask the server Api for only the vitals we need speicfically
   const slugs = [...document.querySelectorAll('[data-slug]')].map(b => b.dataset.slug);
   const logsBox = document.querySelector('.box-recent-logs');
 
-  // Each .log-row is a fixed 30px (border-box, no gap) and the box has 7px
-  // top + bottom padding, so the available height divides cleanly by the row
-  // height — no fudge factor needed.
+  // calculates how many log rows fit in the box
   const rowsThatFit = () => Math.max(3, Math.floor((logsBox.clientHeight - 14) / 30));
 
+  // open the live connection to the server, asking for as many log rows as calculated.
+  // if the count hasn't changed then the existing connection is left alone
   let stream;
   let lastLimit = 0;
   function startStream() {
@@ -206,12 +233,12 @@
     stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
   }
 
-  // Measure once now, then again after the web font loads (which reflows the
-  // layout and changes how many rows fit) and on resize.
+  // logic when window is resized to recalculate how many log rows fit in the box
   startStream();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(startStream);
   let resizeTimer;
   window.addEventListener('resize', () => {
+    // wait until user stop resizing before remeasuring
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(startStream, 200);
   });

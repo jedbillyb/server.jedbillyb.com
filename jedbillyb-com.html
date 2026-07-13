@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- website title, icon and stylesheet -->
 <head>
     <meta charset="UTF-8">
     <title>jedbillyb.com · server.jedbillyb.com</title>
@@ -9,11 +10,14 @@
 </head>
 
 <body>
+    <!-- row of links across the navigation bar -->
     <div class="header">
         <div class="header-left">
+        <!-- logo/link to home on the left side of navigation bar -->
             <a href="/">server.jedbillyb.com</a>
             <span class="breadcrumb">/ jedbillyb.com</span>
         </div>
+        <!-- links on the right of navigation bar -->
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
@@ -22,18 +26,22 @@
     </div>
 
     <main class="project-page">
+
+        <!-- project name on the left, running/stopped on the right -->
         <div class="project-top">
             <div class="project-meta">
                 <div class="project-label">// project</div>
                 <h1 class="project-title">jedbillyb.com</h1>
                 <div class="project-subtitle">this site's parent</div>
             </div>
+            <!-- project status and tags -->
             <div class="project-status">
                 <span class="status-dot"></span>
                 running · nginx · <span id="uptime">—</span>
             </div>
         </div>
 
+        <!-- links out to the live site and the source code -->
         <div class="project-links">
             <a href="https://jedbillyb.com" target="_blank" class="project-link">
                 jedbillyb.com ↗ <span class="link-tag">live</span>
@@ -43,8 +51,12 @@
             </a>
         </div>
 
+        <!-- two columns: description on the left, vitals on the right -->
         <div class="project-grid">
+
             <div class="project-col-left">
+
+                <!-- what the project is -->
                 <div class="card">
                     <div class="card-header">// description</div>
                     <div class="description-body">
@@ -52,6 +64,7 @@
                     </div>
                 </div>
 
+                <!-- what it is built with -->
                 <div class="card">
                     <div class="card-header">// stack</div>
                     <table class="stack-table">
@@ -83,7 +96,10 @@
                 </div>
             </div>
 
+            <!-- right column, fills in once the page loads -->
             <div class="project-col-right">
+
+                <!-- four live vitals, load and disk are the entire server's -->
                 <div class="card">
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
@@ -106,6 +122,7 @@
                     </div>
                 </div>
 
+                <!-- last few lines of the nginx log -->
                 <div class="card">
                     <div class="card-header">// recent log</div>
                     <div class="log-body" id="log-body">
@@ -113,6 +130,7 @@
                     </div>
                 </div>
 
+                <!-- links to the other project pages -->
                 <div class="card">
                     <div class="card-header">// other projects</div>
                     <div class="other-projects">
@@ -124,18 +142,22 @@
         </div>
     </main>
 
+    <!-- footer of the page -->
     <footer class="footer">
         <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
         <span>jed blenkhorn · 2026</span>
     </footer>
 
 <script>
+// where all the live data comes from, the server's Api
 const API = 'https://server.jedbillyb.com/api';
 
+// make text safe to drop into the page so log lines can't inject html
 function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// turn a number of seconds into something like "3d 04:20" using Math.floor and string padding
 function formatUptime(seconds) {
     const d = Math.floor(seconds / 86400);
     const h = Math.floor((seconds % 86400) / 3600);
@@ -143,13 +165,17 @@ function formatUptime(seconds) {
     return `${d}d ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
+// log timestamps are served in millionths of a second, code converts it into standard clock time
 function tsToTime(usec) {
     return new Date(Number(usec) / 1000).toLocaleTimeString('en-NZ', {
         hour: '2-digit', minute: '2-digit', hour12: false
     });
 }
 
+// logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
 function apply(snap) {
+
+    // load, disk and uptime are the entires server's vitals
     if (snap.system) {
         const sys = snap.system;
         const load = sys.cpu?.load?.[0];
@@ -159,6 +185,7 @@ function apply(snap) {
         if (sys.uptime) document.getElementById('uptime').textContent = formatUptime(sys.uptime);
     }
 
+    // this site is just files served by nginx, so its health is nginx's health
     const nginx = snap.service?.['nginx.service'];
     if (nginx) {
         const sub = nginx.SubState ?? nginx.sub ?? '—';
@@ -171,6 +198,7 @@ function apply(snap) {
         }
     }
 
+    // rebuild the log box, one line per entry with the time on the left and the message on the right
     if (Array.isArray(snap.logs) && snap.logs.length) {
         document.getElementById('log-body').innerHTML = snap.logs.map(e => {
             const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
@@ -179,6 +207,7 @@ function apply(snap) {
     }
 }
 
+// open the live connection fromt the server and ask for the last 5 lines of the nginx log, updating every second
 const stream = new EventSource(`${API}/stream?system=1&service=nginx.service&logs=nginx&logsLimit=5&interval=1000`);
 stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>

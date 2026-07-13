@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- website title, icon and stylesheet -->
 <head>
     <meta charset="UTF-8">
     <title>posthog-webhook · server.jedbillyb.com</title>
@@ -9,11 +10,14 @@
 </head>
 
 <body>
+    <!-- row of links across the navigation bar -->
     <div class="header">
         <div class="header-left">
+        <!-- logo/link to home on the left side of navigation bar -->
             <a href="/">server.jedbillyb.com</a>
             <span class="breadcrumb">/ posthog-webhook</span>
         </div>
+        <!-- links on the right of navigation bar -->
         <div class="header-right">
             <a href="/">projects</a>
             <a href="/manifest.html">manifest</a>
@@ -22,26 +26,34 @@
     </div>
 
     <main class="project-page">
+
+        <!-- project name on the left, running/stopped on the right -->
         <div class="project-top">
             <div class="project-meta">
                 <div class="project-label">// project</div>
                 <h1 class="project-title">posthog-webhook</h1>
                 <div class="project-subtitle">analytics → telegram</div>
             </div>
+            <!-- project status and tags -->
             <div class="project-status">
                 <span class="status-dot"></span>
                 running · systemd · <span id="uptime-status">—</span>
             </div>
         </div>
 
+        <!-- links out to the source code -->
         <div class="project-links">
             <a href="https://github.com/jedbillyb/posthog-notify" target="_blank" class="project-link">
                 github ↗ <span class="link-tag">/jedbillyb/posthog-notify</span>
             </a>
         </div>
 
+        <!-- two columns: description on the left, vitals on the right -->
         <div class="project-grid">
+
             <div class="project-col-left">
+
+                <!-- what the project is -->
                 <div class="card">
                     <div class="card-header">// description</div>
                     <div class="description-body">
@@ -49,6 +61,7 @@
                     </div>
                 </div>
 
+                <!-- what it is built with -->
                 <div class="card">
                     <div class="card-header">// stack</div>
                     <table class="stack-table">
@@ -80,7 +93,10 @@
                 </div>
             </div>
 
+            <!-- right column, fills in once the page loads -->
             <div class="project-col-right">
+
+                <!-- four live vitals, cpu is the entire server's and events/h is how many it forwarded in the last hour -->
                 <div class="card">
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
@@ -103,6 +119,7 @@
                     </div>
                 </div>
 
+                <!-- last few lines of the log, forwarded ones go green and skipped ones yellow -->
                 <div class="card">
                     <div class="card-header">// recent log</div>
                     <div class="log-body" id="log-body">
@@ -110,6 +127,7 @@
                     </div>
                 </div>
 
+                <!-- links to the other project pages -->
                 <div class="card">
                     <div class="card-header">// other projects</div>
                     <div class="other-projects">
@@ -121,22 +139,29 @@
         </div>
     </main>
 
+    <!-- footer of the page -->
     <footer class="footer">
         <a href="/" class="footer-back">← back to server.jedbillyb.com</a>
         <span>jed blenkhorn · 2026</span>
     </footer>
 
+<!-- shared helpers used by the script below -->
 <script src="/utils.js"></script>
 <script>
+// where all the live data comes from, the server's Api
 const API = 'https://server.jedbillyb.com/api';
 
+// colour a log line: green if it went out to telegram, yellow if it was skipped
 function logClass(msg) {
     if (msg.startsWith('→ tg')) return 'log-green';
     if (msg.includes('skipped')) return 'log-yellow';
     return '';
 }
 
+// logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
 function apply(snap) {
+
+    // cpu is the entire server's, not just this service's
     if (snap.system) {
         const load = snap.system.cpu?.load?.[0];
         if (load != null) {
@@ -144,6 +169,7 @@ function apply(snap) {
         }
     }
 
+    // this service's own vitals: events forwarded, when the last one came in, uptime and ram
     const v = snap.vitals?.['posthog-webhook'];
     if (v) {
         if (v.events_per_hour != null) document.querySelector('[data-vital="events_per_hour"]').textContent = v.events_per_hour;
@@ -152,6 +178,7 @@ function apply(snap) {
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
+    // rebuild the log box, one line per entry with the time on the left and the message on the right, coloured by logClass
     const entries = snap.projectLogs?.['posthog-webhook'];
     if (Array.isArray(entries) && entries.length) {
         document.getElementById('log-body').innerHTML = entries.map(e => {
@@ -163,6 +190,7 @@ function apply(snap) {
     }
 }
 
+// open the live connection from the server and ask for the last 7 lines of the log, updating every second
 const stream = new EventSource(`${API}/stream?system=1&vitals=posthog-webhook&projectLogs=posthog-webhook&logsLimit=7&interval=1000`);
 stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
