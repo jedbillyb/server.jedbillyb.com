@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [v1]
 
 jobs:
   deploy:
@@ -19,5 +19,5 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /home/ubuntu/server.jedbillyb.com
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin v1
+            git reset --hard origin/v1
