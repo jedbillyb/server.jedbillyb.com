@@ -173,14 +173,25 @@ function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// turn a number of seconds into something like "1y 3d 04:20", dropping the year part when it's under a year
+// turn a number of seconds into labelled units like "1y 28d 14h 42m", skipping
+// any leading unit that's zero so short uptimes stay short
 function formatUptime(seconds) {
-    const y = Math.floor(seconds / 31536000);
-    const d = Math.floor((seconds % 31536000) / 86400);
-    const h = Math.floor((seconds % 86400) / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const clock = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    return y > 0 ? `${y}y ${d}d ${clock}` : `${d}d ${clock}`;
+    const units = [
+        ['y', 31536000],
+        ['d', 86400],
+        ['h', 3600],
+        ['m', 60],
+    ];
+    const parts = [];
+    let rest = Math.floor(seconds);
+    for (const [label, size] of units) {
+        const value = Math.floor(rest / size);
+        rest %= size;
+        // skip zeroes until the first real unit, then keep everything after it
+        if (value > 0 || parts.length > 0) parts.push(`${value}${label}`);
+    }
+    // under a minute there's nothing above to show, so fall back to seconds
+    return parts.length > 0 ? parts.join(' ') : `${rest}s`;
 }
 
 // log timestamps are served in millionths of a second, code converts it into standard clock time
