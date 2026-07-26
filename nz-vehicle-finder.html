@@ -173,12 +173,14 @@ function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// turn a number of seconds into something like "3d 04:20" using Math.floor and string padding
+// turn a number of seconds into something like "1y 3d 04:20", dropping the year part when it's under a year
 function formatUptime(seconds) {
-    const d = Math.floor(seconds / 86400);
+    const y = Math.floor(seconds / 31536000);
+    const d = Math.floor((seconds % 31536000) / 86400);
     const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-    return `${d}d ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    const clock = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    return y > 0 ? `${y}y ${d}d ${clock}` : `${d}d ${clock}`;
 }
 
 // log timestamps are served in millionths of a second, code converts it into standard clock time
@@ -210,7 +212,8 @@ function apply(snap) {
             portEl.textContent = v.portListening ? 'open' : 'closed';
             if (v.portListening) portEl.classList.add('vital-green');
         }
-        if (v.pm2Uptime) document.getElementById('uptime').textContent = formatUptime(v.pm2Uptime / 1000);
+        // pm2Uptime is the process start timestamp (ms since epoch), not an elapsed duration
+        if (v.pm2Uptime) document.getElementById('uptime').textContent = formatUptime((Date.now() - v.pm2Uptime) / 1000);
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
