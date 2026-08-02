@@ -44,7 +44,6 @@ export const projects = [
     slug: 'profile-server',
     name: 'Profile Server',
     description: 'Personal profile and project server',
-    service: 'profile-server.service',
     port: 3003,
     path: '/home/ubuntu/profile-server',
     url: 'https://server.jedbillyb.com/setup',
