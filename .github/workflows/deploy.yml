@@ -18,6 +18,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd /home/ubuntu/server.jedbillyb.com
             git fetch origin v1
             git reset --hard origin/v1
+            if [ ! -f api/.env ] && [ -f /home/ubuntu/server-api/.env ]; then
+              cp /home/ubuntu/server-api/.env api/.env
+            fi
+            npm --prefix api install --omit=dev
+            pm2 delete server-api || true
+            pm2 start server.js --name server-api --cwd /home/ubuntu/server.jedbillyb.com/api
+            pm2 save
