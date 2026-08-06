@@ -115,13 +115,13 @@
             <!-- right column, fills in once the page loads -->
             <div class="project-col-right">
 
-                <!-- four live vitals, load is the entire server's -->
+                <!-- four live vitals, project specific-->
                 <div class="card">
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
                         <div class="vital">
-                            <div class="vital-label">load</div>
-                            <div class="vital-value vital-green" data-vital="load">—</div>
+                            <div class="vital-label">cpu</div>
+                            <div class="vital-value vital-green" data-vital="cpu">—</div>
                         </div>
                         <div class="vital">
                             <div class="vital-label">mem</div>
@@ -216,17 +216,14 @@ function setStatus(up) {
 // logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
 function apply(snap) {
 
-    // load is the entire server's, not just this project's
-    if (snap.system) {
-        const load = snap.system.cpu?.load?.[0];
-        if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
-    }
-
     // this project's own vitals. the server calls it "vehicle-api"
     const v = snap.vitals?.['vehicle-api'];
     if (v) {
         const up = isUp(v);
         setStatus(up);
+        // this project's specific cpu usage, reads 0% when process is stopped
+        document.querySelector('[data-vital="cpu"]').textContent =
+            up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
         // green if it's online and the port is open
         const pm2El = document.querySelector('[data-vital="pm2"]');
         const portEl = document.querySelector('[data-vital="port"]');
@@ -255,7 +252,7 @@ function apply(snap) {
 }
 
 // open the live connection from the server and ask for the last 6 lines of the log, updating every second
-const stream = new EventSource(`${API}/stream?system=1&vitals=vehicle-api&projectLogs=vehicle-api&logsLimit=6&interval=1000`);
+const stream = new EventSource(`${API}/stream?vitals=vehicle-api&projectLogs=vehicle-api&logsLimit=6&interval=1000`);
 stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>

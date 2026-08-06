@@ -3,6 +3,7 @@ import { readFile, readdir } from 'fs/promises';
 import { execAsync } from '../utils/exec.js';
 import { inspectContainer } from '../utils/container.js';
 import { mcPing } from '../utils/mcping.js';
+import { cpuPercent, resetCpu } from '../utils/cpu.js';
 import { projects } from '../config/projects.js';
 
 const router = Router();
@@ -31,8 +32,8 @@ router.get('/:slug', (req, res) => {
 
 export async function collectProjectVitals(project) {
   const vitals = { slug: project.slug, name: project.name };
-  
-  
+
+
   if (project.mcVersion) vitals.version = project.mcVersion;
 
   await Promise.allSettled([
@@ -53,15 +54,23 @@ export async function collectProjectVitals(project) {
           .catch(() => {  })
       : Promise.resolve(),
     project.service
-      ? execAsync(`systemctl show ${project.service} -p ActiveState -p MemoryCurrent`).then(out => {
+      ? execAsync(`systemctl show ${project.service} -p ActiveState -p MemoryCurrent -p CPUUsageNSec`).then(out => {
           const props = Object.fromEntries(
             out.trim().split('\n').map(l => l.split('=').map(s => s.trim()))
           );
           if (props.ActiveState) vitals.serviceStatus = props.ActiveState;
           const mem = Number(props.MemoryCurrent);
-          
+
           if (Number.isFinite(mem) && mem > 0 && mem < Number.MAX_SAFE_INTEGER) {
             vitals.memBytes = mem;
+          }
+
+          if (props.ActiveState === 'active') {
+            const pct = cpuPercent(project.slug, Number(props.CPUUsageNSec));
+            if (pct != null) vitals.cpuPercent = pct;
+          } else {
+            resetCpu(project.slug);
+            vitals.cpuPercent = 0;
           }
         }).catch(() => {  })
       : Promise.resolve(),
@@ -81,27 +90,43 @@ export async function collectProjectVitals(project) {
     project.port
       ? execAsync(`ss -tlnp | grep :${project.port}`).then(async out => {
           vitals.portListening = out.trim() !== '';
-          
-          
+
+
           if (!project.service && !project.pm2 && out.trim() !== '') {
             const pid = out.match(/pid=(\d+)/)?.[1];
             if (pid) {
               const rss = await execAsync(`awk '/^VmRSS:/{print $2}' /proc/${pid}/status`)
                 .then(r => Number(r.trim()) * 1024).catch(() => null);
               if (Number.isFinite(rss) && rss > 0) vitals.memBytes = rss;
+
+              const ticks = await readFile(`/proc/${pid}/stat`, 'utf8').then(s => {
+                const f = s.slice(s.lastIndexOf(')') + 2).split(' ');
+                return Number(f[11]) + Number(f[12]);
+              }).catch(() => null);
+
+              if (Number.isFinite(ticks)) {
+                // the kernel counts in ticks of 1/100th of a second
+                const pct = cpuPercent(project.slug, (ticks / 100) * 1e9);
+                if (pct != null) vitals.cpuPercent = pct;
+              }
             }
+          }
+
+          if (!project.service && !project.pm2 && out.trim() === '') {
+            resetCpu(project.slug);
+            vitals.cpuPercent = 0;
           }
         }).catch(() => { vitals.portListening = false; })
       : Promise.resolve(),
     project.openclawHome
       ? Promise.allSettled([
-          
-          
+
+
           readFile(`${project.openclawHome}/openclaw.json`, 'utf8').then(raw => {
             const primary = JSON.parse(raw)?.agents?.defaults?.model?.primary;
             if (primary) vitals.model = primary.split('/').pop();
           }),
-          
+
           readdir(`${project.openclawHome}/workspace`).then(files => {
             vitals.memoryFiles = files.filter(f => f.endsWith('.md')).length;
           }),
@@ -116,28 +141,28 @@ export async function collectProjectLogs(project, limit = 6) {
   const n = Math.min(Math.max(parseInt(limit) || 6, 1), 100);
 
   if (project.container) {
-      
-      
-      
+
+
+
       const out = await execAsync(
         `docker logs --timestamps --tail ${Math.min(n * 8, 500)} ${project.container} 2>&1`
       );
       const clean = s => (
-        s.replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '') 
-          .split('\r')                           
+        s.replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '')
+          .split('\r')
           .map(t => t.trim())
           .filter(Boolean)
           .pop() || ''
       );
-      
+
       const sensitive = [
-        /]:\s*<[^>]+>/,                 
-        /]:\s*\[[^\]]+ -> [^\]]+\]/,    
-        /]:\s*\* /,                     
-        /issued server command/i,       
-        /\bran command\b/i,             
+        /]:\s*<[^>]+>/,
+        /]:\s*\[[^\]]+ -> [^\]]+\]/,
+        /]:\s*\* /,
+        /issued server command/i,
+        /\bran command\b/i,
       ];
-      
+
       const redact = s => s.replace(/(\/)?\b\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?/g, '[redacted]');
 
       const entries = out.trim().split('\n').filter(Boolean).map(line => {

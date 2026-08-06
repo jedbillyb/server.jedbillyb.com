@@ -116,7 +116,7 @@
             <!-- right column, fills in once the page loads -->
             <div class="project-col-right">
 
-                <!-- four live vitals, cpu is the entire server's and "memory" is how many memory files it has -->
+                <!-- four live vitals, "memory" is how many memory files it has -->
                 <div class="card">
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
@@ -186,12 +186,11 @@ function setStatus(up) {
 
 function apply(snap) {
 
-    // cpu is the entire server's, and shows in two places: the vitals box and the badge up top
+    // server-wide cpu, still shown in the badge up top
     if (snap.system) {
         const load = snap.system.cpu?.load?.[0];
         if (load != null) {
             const pct = load.toFixed(1) + '%';
-            document.querySelector('[data-vital="cpu"]').textContent = pct;
             document.getElementById('cpu-status').textContent = '~' + pct + ' cpu';
         }
     }
@@ -199,7 +198,11 @@ function apply(snap) {
     // openclaw's own vitals: which model it's using, how many memory files it has, and its ram
     const v = snap.vitals?.openclaw;
     if (v) {
-        setStatus(isUp(v));
+        const up = isUp(v);
+        setStatus(up);
+        // openclaw's specific cpu usage, reads 0% when process is stopped
+        document.querySelector('[data-vital="cpu"]').textContent =
+            up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
         if (v.model) document.querySelector('[data-vital="model"]').textContent = v.model;
         if (v.memoryFiles != null) document.querySelector('[data-vital="memory"]').textContent = v.memoryFiles + ' .md';
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
