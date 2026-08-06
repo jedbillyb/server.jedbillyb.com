@@ -15,7 +15,7 @@ export async function collectServices() {
   const out = await execAsync(
     'systemctl list-units --type=service --no-pager --no-legend'
   );
-  return out.trim().split('\n').filter(Boolean).map(line => {
+  const list = out.trim().split('\n').filter(Boolean).map(line => {
     const parts = line.trim().replace(/^●\s*/, '').split(/\s+/);
     return {
       unit: parts[0],
@@ -25,6 +25,31 @@ export async function collectServices() {
       description: parts.slice(4).join(' '),
     };
   });
+
+  const names = list.map(s => s.unit).filter(u => validUnit.test(u));
+  if (names.length) {
+    const shown = await execAsync(
+      `systemctl show ${names.join(' ')} -p Id -p ActiveEnterTimestamp`
+    ).catch(() => '');
+
+    const startedAt = {};
+    for (const block of shown.trim().split('\n\n')) {
+      const props = {};
+      for (const line of block.trim().split('\n')) {
+        const i = line.indexOf('=');
+        if (i > 0) props[line.slice(0, i)] = line.slice(i + 1);
+      }
+      // systemd writes the weekday first, e.g. "Wed 2026-07-22 06:59:29 UTC"
+      const ts = Date.parse(String(props.ActiveEnterTimestamp ?? '').replace(/^[A-Za-z]{3}\s/, ''));
+      if (props.Id && Number.isFinite(ts)) startedAt[props.Id] = ts;
+    }
+
+    for (const s of list) {
+      if (s.active === 'active' && startedAt[s.unit]) s.since = startedAt[s.unit];
+    }
+  }
+
+  return list;
 }
 
 export async function collectService(unit) {

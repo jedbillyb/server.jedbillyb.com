@@ -194,6 +194,15 @@ const usageChart = new Chart(document.getElementById('usage-chart'), {
 });
 
 // add a new point to the graph. only the last 30 are kept, so the oldest points are removed as new ones arrive
+// compact uptime for the narrow table column, e.g. "15d", "3h", "12m".
+function shortUptime(seconds) {
+    const m = Math.floor(Math.max(0, seconds) / 60);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h`;
+    return `${Math.floor(h / 24)}d`;
+}
+
 function pushUsage(cpu, ram) {
     if (cpu == null && ram == null) return;
     usageChart.data.labels.push(dayjs().format('HH:mm:ss'));
@@ -279,7 +288,7 @@ function apply(snap) {
             return `<tr>
                 <td><span class="dot ${up?'green':'grey'}"></span>${esc(p.name)}</td>
                 <td class="${up?'green':'muted'}">${esc(s.sub ?? '—')}</td>
-                <td class="muted">${esc(p.service)}</td>
+                <td class="muted">${esc(up && s.since ? shortUptime((Date.now() - s.since) / 1000) : '—')}</td>
             </tr>`;
         });
         document.getElementById('services-body').innerHTML = keyServices.join('') || '<tr><td colspan="3">no data</td></tr>';
