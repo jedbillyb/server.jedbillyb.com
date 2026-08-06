@@ -40,7 +40,11 @@ export async function collectProjectVitals(project) {
     project.container
       ? inspectContainer(project.container).then(c => {
           vitals.state = c.state === 'running' ? 'running' : c.state;
-          if (c.startedAt) vitals.last_up = since(c.startedAt);
+          // while service is up it shows how long it has been up for. once it's down it shows
+          // how long since it stopped/crashed
+          vitals.last_up = c.state === 'running'
+            ? since(c.startedAt)
+            : since(c.finishedAt);
           if (c.mem) vitals.heap = c.mem.split('/')[0].trim();
           if (c.cpu) vitals.cpu = c.cpu;
         })

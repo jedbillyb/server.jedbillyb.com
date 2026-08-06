@@ -114,7 +114,7 @@
                             <div class="vital-value vital-value-lg vital-red" id="vital-state">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label">last up</div>
+                            <div class="vital-label" id="lastup-label">last up</div>
                             <div class="vital-value vital-value-lg" id="vital-lastup">—</div>
                         </div>
                         <div class="vital">
@@ -189,15 +189,12 @@ function apply(snap) {
             document.getElementById('subtitle').textContent = 'personal survival server · offline';
         }
 
-        // if the server is up, show how long it's been up, otherwise show how long since it was last up
-        const verb = isRunning ? 'up' : 'since';
         document.getElementById('status-text').innerHTML =
-            `${esc(state)} · pelican · ${verb} <span id="status-since">${esc(v.last_up ?? '—')}</span>`;
+            `${esc(state)} · pelican · <span id="status-since">${esc(v.last_up ?? '—')}</span>`;
 
-        // the rest of the servers vitals boxes
-        if (v.last_up) {
-            document.getElementById('vital-lastup').textContent = v.last_up;
-        }
+        // when service is running the vital is uptime, when down it's how long since stop/crash
+        document.getElementById('lastup-label').textContent = isRunning ? 'uptime' : 'last up';
+        document.getElementById('vital-lastup').textContent = v.last_up ?? '—';
         if (v.players != null) {
             document.getElementById('vital-players').textContent = v.players;
         }

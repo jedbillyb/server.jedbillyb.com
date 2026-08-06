@@ -18,7 +18,7 @@ function writeVarInt(value) {
 function readVarInt(buf, offset) {
   let value = 0, size = 0, b;
   do {
-    if (offset + size >= buf.length) return null; 
+    if (offset + size >= buf.length) return null;
     b = buf[offset + size];
     value |= (b & 0x7f) << (7 * size);
     size++;
@@ -52,14 +52,14 @@ export function mcPing(host, port = 25565, timeout = 3000) {
     socket.on('connect', () => {
       const addr = Buffer.from(host, 'utf8');
       const handshake = packet(
-        writeVarInt(0x00),                 
-        writeVarInt(47),                   
-        writeVarInt(addr.length), addr,    
-        Buffer.from([(port >> 8) & 0xff, port & 0xff]), 
-        writeVarInt(0x01),                 
+        writeVarInt(0x00),
+        writeVarInt(47),
+        writeVarInt(addr.length), addr,
+        Buffer.from([(port >> 8) & 0xff, port & 0xff]),
+        writeVarInt(0x01),
       );
       socket.write(handshake);
-      socket.write(packet(writeVarInt(0x00))); 
+      socket.write(packet(writeVarInt(0x00)));
     });
 
     socket.on('data', data => {
@@ -67,11 +67,11 @@ export function mcPing(host, port = 25565, timeout = 3000) {
       const lenHeader = readVarInt(chunks, 0);
       if (!lenHeader) return;
       const total = lenHeader.size + lenHeader.value;
-      if (chunks.length < total) return; 
+      if (chunks.length < total) return;
 
       let off = lenHeader.size;
-      const pid = readVarInt(chunks, off); off += pid.size;       
-      const strLen = readVarInt(chunks, off); off += strLen.size; 
+      const pid = readVarInt(chunks, off); off += pid.size;
+      const strLen = readVarInt(chunks, off); off += strLen.size;
       const json = chunks.slice(off, off + strLen.value).toString('utf8');
 
       try {
