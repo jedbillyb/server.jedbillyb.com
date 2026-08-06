@@ -287,8 +287,7 @@ body {
 
 .data-table tr:last-child td { border-bottom: none; }
 
-/* the colour utilities are less specific than the rule above, so they need
-   restating here or every cell just comes out the default dark grey */
+/* the colour utilities need restating here or every cell just comes out the default dark grey */
 .data-table td.green { color: #22c55e; }
 .data-table td.blue { color: #5B9BD5; }
 .data-table td.muted { color: #888; }
