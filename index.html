@@ -167,14 +167,27 @@
   dayjs.extend(dayjs_plugin_duration);
   lucide.createIcons();
 
+  // a project counts as running if the service is up, pm2 says online, the container is running, or its port is open
+  function isUp(d) {
+    return d.serviceStatus === 'active'
+      || d.pm2Status === 'online'
+      || d.state === 'running'
+      || d.portListening === true;
+  }
+
+  // how many of the project cards are currently stopped, or null if nothing has been read yet
+  let projectsDown = null;
+
   // code to fill in the four stats in the top right of the page, and the last incident time
   function applyStatus(d) {
-    document.querySelector('.stat-row:nth-child(1) .stat-value').textContent = d.ok ? 'online' : 'degraded';
-    document.querySelector('.stat-row:nth-child(2) .stat-value').textContent = fmtUptime(d.uptime);
-    document.querySelector('.stat-row:nth-child(3) .stat-value').textContent =
-      d.failedServices === 0 ? 'all running' : `${d.failedServices} failed`;
-    document.querySelector('.stat-row:nth-child(4) .stat-value').textContent =
-      d.failedServices === 0 ? 'none' : 'now';
+    const val = n => document.querySelector(`.stat-row:nth-child(${n}) .stat-value`);
+    const degraded = projectsDown > 0 || d.failedServices > 0;
+
+    val(1).textContent = projectsDown === null ? '--' : degraded ? 'degraded' : 'online';
+    val(2).textContent = fmtUptime(d.uptime);
+    val(3).textContent = projectsDown === null ? '--'
+      : projectsDown === 0 ? 'all running' : `${projectsDown} stopped`;
+    val(4).textContent = projectsDown === null ? '--' : degraded ? 'now' : 'none';
   }
 
   // code to put running or stopped in the corner of each project card
@@ -187,12 +200,7 @@
       return;
     }
 
-    // status counts as running if the service is up, pm2 says online, the container is running, or its port is open
-    const up = d.serviceStatus === 'active'
-      || d.pm2Status === 'online'
-      || d.state === 'running'
-      || d.portListening === true;
-
+    const up = isUp(d);
     el.textContent = up ? 'running' : 'stopped';
     el.className = `box-status ${up ? 'running' : 'stopped'}`;
   }
@@ -227,13 +235,18 @@
 
   // runs every time new data arrives from Api
   function apply(snap) {
-    if (snap.status) applyStatus(snap.status);
+    // vitals are counted first so the stats panel agrees with the cards below it
     if (snap.vitals) {
+      let down = 0, known = 0;
       // match each card to its data using the corresponding data-slug on the card
       document.querySelectorAll('[data-slug]').forEach(box => {
-        applyVitals(box, snap.vitals[box.dataset.slug] || null);
+        const d = snap.vitals[box.dataset.slug] || null;
+        applyVitals(box, d);
+        if (d) { known++; if (!isUp(d)) down++; }
       });
+      projectsDown = known ? down : null;
     }
+    if (snap.status) applyStatus(snap.status);
     if (Array.isArray(snap.activity)) applyActivity(snap.activity);
   }
 
