@@ -79,6 +79,8 @@ export const projects = [
     service: 'posthog-webhook.service',
     port: 8000,
     path: '/home/ubuntu/posthog-notify',
+    // the webhook keeps no database, so event counts come from its access log
+    eventLog: { hit: 'POST /posthog', skipped: 'Skipped:' },
   },
   {
     slug: 'openclaw',

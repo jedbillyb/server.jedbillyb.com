@@ -136,6 +136,31 @@ export async function collectProjectVitals(project) {
           }
         }).catch(() => { vitals.portListening = false; })
       : Promise.resolve(),
+    project.eventLog && project.service
+      ? execAsync(`journalctl -u ${project.service} --no-pager -o short-iso -n 5000`).then(out => {
+          const now = Date.now();
+          const hourAgo = now - 3600000;
+          let hits = 0, skipped = 0, newest = null;
+
+          for (const line of out.split('\n')) {
+            const isHit = line.includes(project.eventLog.hit);
+            const isSkip = line.includes(project.eventLog.skipped);
+            if (!isHit && !isSkip) continue;
+
+            // timestamp is in format of "2026-07-27T21:13:05+0000"
+            const ms = Date.parse(line.slice(0, line.indexOf(' ')));
+            if (!Number.isFinite(ms)) continue;
+
+            if (isHit && (newest === null || ms > newest)) newest = ms;
+            if (ms >= hourAgo) isHit ? hits++ : skipped++;
+          }
+
+          // every request logs, so the ones that are not forwarded
+          // log a skip, so the vital is what actually reaches telegram
+          vitals.events_per_hour = Math.max(0, hits - skipped);
+          vitals.last_event = newest === null ? null : since(new Date(newest).toISOString());
+        }).catch(() => {  })
+      : Promise.resolve(),
     project.openclawHome
       ? Promise.allSettled([
 

@@ -211,8 +211,10 @@ function apply(snap) {
         // this service's specific cpu usage, reads 0% once stopped
         document.querySelector('[data-vital="cpu"]').textContent =
             up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
-        if (v.events_per_hour != null) document.querySelector('[data-vital="events_per_hour"]').textContent = v.events_per_hour;
-        if (v.last_event != null) document.querySelector('[data-vital="last_event"]').textContent = v.last_event;
+        document.querySelector('[data-vital="events_per_hour"]').textContent =
+            v.events_per_hour != null ? v.events_per_hour : '—';
+        document.querySelector('[data-vital="last_event"]').textContent =
+            v.last_event ? v.last_event + ' ago' : 'never';
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 
