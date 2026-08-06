@@ -54,7 +54,7 @@ export async function collectProjectVitals(project) {
           .catch(() => {  })
       : Promise.resolve(),
     project.service
-      ? execAsync(`systemctl show ${project.service} -p ActiveState -p MemoryCurrent -p CPUUsageNSec`).then(out => {
+      ? execAsync(`systemctl show ${project.service} -p ActiveState -p MemoryCurrent -p CPUUsageNSec -p ActiveEnterTimestamp`).then(out => {
           const props = Object.fromEntries(
             out.trim().split('\n').map(l => l.split('=').map(s => s.trim()))
           );
@@ -68,9 +68,16 @@ export async function collectProjectVitals(project) {
           if (props.ActiveState === 'active') {
             const pct = cpuPercent(project.slug, Number(props.CPUUsageNSec));
             if (pct != null) vitals.cpuPercent = pct;
+
+            // systemd writes the weekday first, e.g. "Wed 2026-07-22 06:59:29 UTC"
+            const started = Date.parse(String(props.ActiveEnterTimestamp ?? '').replace(/^[A-Za-z]{3}\s/, ''));
+            if (Number.isFinite(started)) {
+              vitals.uptimeSeconds = Math.max(0, Math.round((Date.now() - started) / 1000));
+            }
           } else {
             resetCpu(project.slug);
             vitals.cpuPercent = 0;
+            vitals.uptimeSeconds = 0;
           }
         }).catch(() => {  })
       : Promise.resolve(),
@@ -99,15 +106,25 @@ export async function collectProjectVitals(project) {
                 .then(r => Number(r.trim()) * 1024).catch(() => null);
               if (Number.isFinite(rss) && rss > 0) vitals.memBytes = rss;
 
-              const ticks = await readFile(`/proc/${pid}/stat`, 'utf8').then(s => {
+              const stat = await readFile(`/proc/${pid}/stat`, 'utf8').then(s => {
                 const f = s.slice(s.lastIndexOf(')') + 2).split(' ');
-                return Number(f[11]) + Number(f[12]);
+                return { ticks: Number(f[11]) + Number(f[12]), startedTicks: Number(f[19]) };
               }).catch(() => null);
 
-              if (Number.isFinite(ticks)) {
+              if (Number.isFinite(stat?.ticks)) {
                 // the kernel counts in ticks of 1/100th of a second
-                const pct = cpuPercent(project.slug, (ticks / 100) * 1e9);
+                const pct = cpuPercent(project.slug, (stat.ticks / 100) * 1e9);
                 if (pct != null) vitals.cpuPercent = pct;
+              }
+
+              // the start time is measured from boot, so compare it against how long
+              // the machine has been up to get the process's own uptime
+              if (Number.isFinite(stat?.startedTicks)) {
+                const booted = await readFile('/proc/uptime', 'utf8')
+                  .then(s => Number(s.split(' ')[0])).catch(() => null);
+                if (Number.isFinite(booted)) {
+                  vitals.uptimeSeconds = Math.max(0, Math.round(booted - stat.startedTicks / 100));
+                }
               }
             }
           }
@@ -115,6 +132,7 @@ export async function collectProjectVitals(project) {
           if (!project.service && !project.pm2 && out.trim() === '') {
             resetCpu(project.slug);
             vitals.cpuPercent = 0;
+            vitals.uptimeSeconds = 0;
           }
         }).catch(() => { vitals.portListening = false; })
       : Promise.resolve(),

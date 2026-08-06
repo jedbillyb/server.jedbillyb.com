@@ -175,6 +175,18 @@ function logClass(msg) {
 }
 
 // logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
+function formatUptime(seconds) {
+    const units = [['y', 31536000], ['d', 86400], ['h', 3600], ['m', 60]];
+    const parts = [];
+    let rest = Math.floor(Math.max(0, seconds));
+    for (const [label, size] of units) {
+        const value = Math.floor(rest / size);
+        rest %= size;
+        if (value > 0 || parts.length > 0) parts.push(`${value}${label}`);
+    }
+    return parts.length > 0 ? parts.join(' ') : `${rest}s`;
+}
+
 // a project counts as running if the service is up, pm2 says online, or its port is open
 function isUp(v) {
     return v.serviceStatus === 'active' || v.pm2Status === 'online' || v.portListening === true;
@@ -194,12 +206,13 @@ function apply(snap) {
     if (v) {
         const up = isUp(v);
         setStatus(up);
+        document.getElementById('uptime-status').textContent =
+            up && v.uptimeSeconds != null ? formatUptime(v.uptimeSeconds) : '0m';
         // this service's specific cpu usage, reads 0% once stopped
         document.querySelector('[data-vital="cpu"]').textContent =
             up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
         if (v.events_per_hour != null) document.querySelector('[data-vital="events_per_hour"]').textContent = v.events_per_hour;
         if (v.last_event != null) document.querySelector('[data-vital="last_event"]').textContent = v.last_event;
-        if (v.uptime != null) document.getElementById('uptime-status').textContent = v.uptime;
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 

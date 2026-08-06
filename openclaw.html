@@ -53,7 +53,7 @@
             <!-- project status and tags -->
             <div class="project-status" id="status-badge">
                 <span class="status-dot" id="status-dot"></span>
-                <span id="status-text">—</span> · gateway.service · <span id="cpu-status">~1% cpu</span>
+                <span id="status-text">—</span> · gateway.service · <span id="uptime-status">—</span>
             </div>
         </div>
 
@@ -172,6 +172,18 @@
 const API = 'https://server.jedbillyb.com/api';
 
 // logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
+function formatUptime(seconds) {
+    const units = [['y', 31536000], ['d', 86400], ['h', 3600], ['m', 60]];
+    const parts = [];
+    let rest = Math.floor(Math.max(0, seconds));
+    for (const [label, size] of units) {
+        const value = Math.floor(rest / size);
+        rest %= size;
+        if (value > 0 || parts.length > 0) parts.push(`${value}${label}`);
+    }
+    return parts.length > 0 ? parts.join(' ') : `${rest}s`;
+}
+
 // a project counts as running if the service is up, pm2 says online, or its port is open
 function isUp(v) {
     return v.serviceStatus === 'active' || v.pm2Status === 'online' || v.portListening === true;
@@ -186,20 +198,13 @@ function setStatus(up) {
 
 function apply(snap) {
 
-    // server-wide cpu, still shown in the badge up top
-    if (snap.system) {
-        const load = snap.system.cpu?.load?.[0];
-        if (load != null) {
-            const pct = load.toFixed(1) + '%';
-            document.getElementById('cpu-status').textContent = '~' + pct + ' cpu';
-        }
-    }
-
     // openclaw's own vitals: which model it's using, how many memory files it has, and its ram
     const v = snap.vitals?.openclaw;
     if (v) {
         const up = isUp(v);
         setStatus(up);
+        document.getElementById('uptime-status').textContent =
+            up && v.uptimeSeconds != null ? formatUptime(v.uptimeSeconds) : '0m';
         // openclaw's specific cpu usage, reads 0% when process is stopped
         document.querySelector('[data-vital="cpu"]').textContent =
             up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
@@ -219,7 +224,7 @@ function apply(snap) {
 }
 
 // open the live connection from the server and ask for the last 7 lines of the log, updating every second
-const stream = new EventSource(`${API}/stream?system=1&vitals=openclaw&projectLogs=openclaw&logsLimit=7&interval=1000`);
+const stream = new EventSource(`${API}/stream?vitals=openclaw&projectLogs=openclaw&logsLimit=7&interval=1000`);
 stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>
