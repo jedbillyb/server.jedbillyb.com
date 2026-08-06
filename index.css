@@ -243,6 +243,12 @@ body {
   color: #888;
 }
 
+/* faded pill when the status isn't known */
+.box-status.unknown {
+  background-color: #f0f0f0;
+  color: #bbb;
+}
+
 /* the manifest card with a blue tint to stand out from the projects */
 .box-manifest {
   background-color: #E8F1F8;

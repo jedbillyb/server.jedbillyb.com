@@ -179,11 +179,22 @@
 
   // code to put running or stopped in the corner of each project card
   function applyVitals(box, d) {
-    // status counts as running if the service is up, or pm2 says online, or its port is open
-    const up = d.serviceStatus === 'active' || d.pm2Status === 'online' || d.portListening === true;
     const el = box.querySelector('.box-status');
+
+    if (!d) {
+      el.textContent = '--';
+      el.className = 'box-status unknown';
+      return;
+    }
+
+    // status counts as running if the service is up, pm2 says online, the container is running, or its port is open
+    const up = d.serviceStatus === 'active'
+      || d.pm2Status === 'online'
+      || d.state === 'running'
+      || d.portListening === true;
+
     el.textContent = up ? 'running' : 'stopped';
-    el.classList.add(up ? 'running' : 'stopped');
+    el.className = `box-status ${up ? 'running' : 'stopped'}`;
   }
 
   // colour for each service name in the log feed, everything else gets the default green
@@ -220,8 +231,7 @@
     if (snap.vitals) {
       // match each card to its data using the corresponding data-slug on the card
       document.querySelectorAll('[data-slug]').forEach(box => {
-        const d = snap.vitals[box.dataset.slug];
-        if (d) applyVitals(box, d);
+        applyVitals(box, snap.vitals[box.dataset.slug] || null);
       });
     }
     if (Array.isArray(snap.activity)) applyActivity(snap.activity);
