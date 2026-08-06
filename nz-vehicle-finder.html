@@ -51,9 +51,9 @@
                 <div class="project-subtitle">vehiclefinder.co.nz</div>
             </div>
             <!-- project status and tags -->
-            <div class="project-status">
-                <span class="status-dot"></span>
-                running · pm2 · <span id="uptime">—</span>
+            <div class="project-status" id="status-badge">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">—</span> · pm2 · <span id="uptime">—</span>
             </div>
         </div>
 
@@ -201,6 +201,18 @@ function tsToTime(usec) {
     });
 }
 
+// a project counts as running if the service is up, pm2 says online, or its port is open
+function isUp(v) {
+    return v.serviceStatus === 'active' || v.pm2Status === 'online' || v.portListening === true;
+}
+
+// swap the badge, dot and wording between the running and stopped styles
+function setStatus(up) {
+    document.getElementById('status-badge').className = up ? 'project-status' : 'project-status-stopped';
+    document.getElementById('status-dot').className = up ? 'status-dot' : 'status-dot-stopped';
+    document.getElementById('status-text').textContent = up ? 'running' : 'stopped';
+}
+
 // logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
 function apply(snap) {
 
@@ -213,6 +225,8 @@ function apply(snap) {
     // this project's own vitals. the server calls it "vehicle-api"
     const v = snap.vitals?.['vehicle-api'];
     if (v) {
+        const up = isUp(v);
+        setStatus(up);
         // green if it's online and the port is open
         const pm2El = document.querySelector('[data-vital="pm2"]');
         const portEl = document.querySelector('[data-vital="port"]');
@@ -223,8 +237,10 @@ function apply(snap) {
             portEl.textContent = v.portListening ? 'open' : 'closed';
             if (v.portListening) portEl.classList.add('vital-green');
         }
-        // pm2Uptime is the process start timestamp (ms since epoch), not an elapsed duration
-        if (v.pm2Uptime) document.getElementById('uptime').textContent = formatUptime((Date.now() - v.pm2Uptime) / 1000);
+        // pm2Uptime is the process start timestamp (ms since epoch), not an elapsed duration.
+        // a stopped process has no uptime, so it reads 0m rather than keeping the old figure
+        document.getElementById('uptime').textContent =
+            up && v.pm2Uptime ? formatUptime((Date.now() - v.pm2Uptime) / 1000) : '0m';
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
     }
 

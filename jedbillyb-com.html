@@ -51,9 +51,9 @@
                 <div class="project-subtitle">this site's parent</div>
             </div>
             <!-- project status and tags -->
-            <div class="project-status">
-                <span class="status-dot"></span>
-                running · nginx · <span id="uptime">—</span>
+            <div class="project-status" id="status-badge">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">—</span> · nginx · <span id="uptime">—</span>
             </div>
         </div>
 
@@ -189,22 +189,37 @@ function tsToTime(usec) {
 }
 
 // logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
+// swap the badge, dot and wording between the running and stopped styles
+function setStatus(up) {
+    document.getElementById('status-badge').className = up ? 'project-status' : 'project-status-stopped';
+    document.getElementById('status-dot').className = up ? 'status-dot' : 'status-dot-stopped';
+    document.getElementById('status-text').textContent = up ? 'running' : 'stopped';
+}
+
 function apply(snap) {
 
-    // load, disk and uptime are the entires server's vitals
+    // load and disk are the entire server's vitals
     if (snap.system) {
         const sys = snap.system;
         const load = sys.cpu?.load?.[0];
         if (load != null) document.querySelector('[data-vital="load"]').textContent = load.toFixed(2);
         const disk = sys.disk?.usedPercent;
         if (disk != null) document.querySelector('[data-vital="disk"]').textContent = disk + '%';
-        if (sys.uptime) document.getElementById('uptime').textContent = formatUptime(sys.uptime);
     }
 
     // this site is just files served by nginx, so its health is nginx's health
     const nginx = snap.service?.['nginx.service'];
     if (nginx) {
         const sub = nginx.SubState ?? nginx.sub ?? '—';
+        const up = nginx.ActiveState === 'active';
+        setStatus(up);
+
+        // ActiveEnterTimestamp is when nginx last started, e.g. "Wed 2026-07-22 06:59:29 UTC".
+        // this is nginx's own uptime, not the whole server's, so it drops to 0m when nginx stops
+        const since = Date.parse(String(nginx.ActiveEnterTimestamp ?? '').replace(/^[A-Za-z]{3}\s/, ''));
+        document.getElementById('uptime').textContent =
+            up && Number.isFinite(since) ? formatUptime((Date.now() - since) / 1000) : '0m';
+
         const el = document.querySelector('[data-vital="nginx"]');
         el.textContent = sub;
         if (sub === 'running') el.classList.add('vital-green');

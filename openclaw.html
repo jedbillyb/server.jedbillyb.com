@@ -51,9 +51,9 @@
                 <div class="project-subtitle">open-source personal ai agent</div>
             </div>
             <!-- project status and tags -->
-            <div class="project-status">
-                <span class="status-dot"></span>
-                running · gateway.service · <span id="cpu-status">~1% cpu</span>
+            <div class="project-status" id="status-badge">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">—</span> · gateway.service · <span id="cpu-status">~1% cpu</span>
             </div>
         </div>
 
@@ -172,6 +172,18 @@
 const API = 'https://server.jedbillyb.com/api';
 
 // logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
+// a project counts as running if the service is up, pm2 says online, or its port is open
+function isUp(v) {
+    return v.serviceStatus === 'active' || v.pm2Status === 'online' || v.portListening === true;
+}
+
+// swap the badge, dot and wording between the running and stopped styles
+function setStatus(up) {
+    document.getElementById('status-badge').className = up ? 'project-status' : 'project-status-stopped';
+    document.getElementById('status-dot').className = up ? 'status-dot' : 'status-dot-stopped';
+    document.getElementById('status-text').textContent = up ? 'running' : 'stopped';
+}
+
 function apply(snap) {
 
     // cpu is the entire server's, and shows in two places: the vitals box and the badge up top
@@ -187,6 +199,7 @@ function apply(snap) {
     // openclaw's own vitals: which model it's using, how many memory files it has, and its ram
     const v = snap.vitals?.openclaw;
     if (v) {
+        setStatus(isUp(v));
         if (v.model) document.querySelector('[data-vital="model"]').textContent = v.model;
         if (v.memoryFiles != null) document.querySelector('[data-vital="memory"]').textContent = v.memoryFiles + ' .md';
         if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';

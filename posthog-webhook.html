@@ -51,9 +51,9 @@
                 <div class="project-subtitle">analytics → telegram</div>
             </div>
             <!-- project status and tags -->
-            <div class="project-status">
-                <span class="status-dot"></span>
-                running · systemd · <span id="uptime-status">—</span>
+            <div class="project-status" id="status-badge">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">—</span> · systemd · <span id="uptime-status">—</span>
             </div>
         </div>
 
@@ -175,6 +175,18 @@ function logClass(msg) {
 }
 
 // logic runs every time new data arrives from server and updates the page with the latest vitals and log lines
+// a project counts as running if the service is up, pm2 says online, or its port is open
+function isUp(v) {
+    return v.serviceStatus === 'active' || v.pm2Status === 'online' || v.portListening === true;
+}
+
+// swap the badge, dot and wording between the running and stopped styles
+function setStatus(up) {
+    document.getElementById('status-badge').className = up ? 'project-status' : 'project-status-stopped';
+    document.getElementById('status-dot').className = up ? 'status-dot' : 'status-dot-stopped';
+    document.getElementById('status-text').textContent = up ? 'running' : 'stopped';
+}
+
 function apply(snap) {
 
     // cpu is the entire server's, not just this service's
@@ -188,6 +200,7 @@ function apply(snap) {
     // this service's own vitals: events forwarded, when the last one came in, uptime and ram
     const v = snap.vitals?.['posthog-webhook'];
     if (v) {
+        setStatus(isUp(v));
         if (v.events_per_hour != null) document.querySelector('[data-vital="events_per_hour"]').textContent = v.events_per_hour;
         if (v.last_event != null) document.querySelector('[data-vital="last_event"]').textContent = v.last_event;
         if (v.uptime != null) document.getElementById('uptime-status').textContent = v.uptime;
