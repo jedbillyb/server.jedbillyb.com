@@ -105,7 +105,7 @@
             <!-- right column, fills in once the page loads -->
             <div class="project-col-right">
 
-                <!-- four live vitals, the 4 GiB heap is a placeholder until the page loads -->
+                <!-- four live vitals, all dashes until the page loads -->
                 <div class="card">
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
@@ -118,8 +118,8 @@
                             <div class="vital-value vital-value-lg" id="vital-lastup">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label">heap (cap)</div>
-                            <div class="vital-value" data-vital="heap">4 GiB</div>
+                            <div class="vital-label">memory</div>
+                            <div class="vital-value" data-vital="heap">—</div>
                         </div>
                         <div class="vital">
                             <div class="vital-label">players</div>
@@ -194,9 +194,11 @@ function apply(snap) {
         if (v.players != null) {
             document.getElementById('vital-players').textContent = v.players;
         }
-        if (v.heap) {
-            document.querySelector('[data-vital="heap"]').textContent = v.heap;
-        }
+        // docker reports memory as "11.15GiB", and 0B when the container isn't reporting anything
+        const mem = v.heap && !v.heap.startsWith('0B')
+            ? v.heap.replace(/([\d.]+)([A-Za-z]+)/, '$1 $2')
+            : null;
+        document.querySelector('[data-vital="heap"]').textContent = isRunning && mem ? mem : '—';
     }
 
     // rebuild the log box, one line per entry with the time on the left and the message on the right
