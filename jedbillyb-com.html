@@ -115,7 +115,7 @@
             <!-- right column, fills in once the page loads -->
             <div class="project-col-right">
 
-                <!-- four live vitals, disk is the entire server's -->
+                <!-- four live vitals, all this site's own -->
                 <div class="card">
                     <div class="card-header">// vitals</div>
                     <div class="vitals-grid">
@@ -196,14 +196,14 @@ function setStatus(up) {
     document.getElementById('status-text').textContent = up ? 'running' : 'stopped';
 }
 
-function apply(snap) {
+// how much space the site's files take up, code chooses whichever unit fits best
+function formatBytes(bytes) {
+    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + ' GB';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(0) + ' MB';
+    return (bytes / 1024).toFixed(0) + ' KB';
+}
 
-    // disk is the entire server's
-    if (snap.system) {
-        const sys = snap.system;
-        const disk = sys.disk?.usedPercent;
-        if (disk != null) document.querySelector('[data-vital="disk"]').textContent = disk + '%';
-    }
+function apply(snap) {
 
     // this site is just files served by nginx, so its health is nginx's health
     const nginx = snap.service?.['nginx.service'];
@@ -215,6 +215,8 @@ function apply(snap) {
         const v = snap.vitals?.['jedbillyb-com'];
         document.querySelector('[data-vital="cpu"]').textContent =
             up && v?.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
+        document.querySelector('[data-vital="disk"]').textContent =
+            v?.diskBytes != null ? formatBytes(v.diskBytes) : '—';
 
         // ActiveEnterTimestamp is when nginx last started, e.g. "Wed 2026-07-22 06:59:29 UTC".
         // this is nginx's own uptime, not the whole server's, so it drops to 0m when nginx stops
@@ -241,7 +243,7 @@ function apply(snap) {
 }
 
 // open the live connection fromt the server and ask for the last 5 lines of the nginx log, updating every second
-const stream = new EventSource(`${API}/stream?system=1&vitals=jedbillyb-com&service=nginx.service&logs=nginx&logsLimit=5&interval=1000`);
+const stream = new EventSource(`${API}/stream?vitals=jedbillyb-com&service=nginx.service&logs=nginx&logsLimit=5&interval=1000`);
 stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
 </script>
 </body>

@@ -140,6 +140,12 @@ export async function collectProjectVitals(project) {
           }
         }).catch(() => { vitals.portListening = false; })
       : Promise.resolve(),
+    project.diskUsage && project.path
+      ? execAsync(`du -sb ${project.path}`).then(out => {
+          const size = out.trim().split(/\s+/)[0];
+          if (/^\d+$/.test(size)) vitals.diskBytes = Number(size);
+        }).catch(() => {  })
+      : Promise.resolve(),
     project.eventLog && project.service
       ? execAsync(`journalctl -u ${project.service} --no-pager -o short-iso -n 5000`).then(out => {
           const now = Date.now();

@@ -97,6 +97,8 @@ export const projects = [
     service: 'nginx.service',
     path: '/var/www/html/jedbillyb.com',
     url: 'https://jedbillyb.com',
+    // measure how much space the site's own files take up
+    diskUsage: true,
   },
   {
     slug: 'minecraft',
