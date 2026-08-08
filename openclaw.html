@@ -206,11 +206,15 @@ function apply(snap) {
         document.getElementById('uptime-status').textContent =
             up && v.uptimeSeconds != null ? formatUptime(v.uptimeSeconds) : '0m';
         // openclaw's specific cpu usage, reads 0% when process is stopped
-        document.querySelector('[data-vital="cpu"]').textContent =
-            up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
+        const cpuEl = document.querySelector('[data-vital="cpu"]');
+        cpuEl.textContent = up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
+        cpuEl.classList.toggle('vital-green', up);
         if (v.model) document.querySelector('[data-vital="model"]').textContent = v.model;
         if (v.memoryFiles != null) document.querySelector('[data-vital="memory"]').textContent = v.memoryFiles + ' .md';
-        if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
+        // a stopped process holds no ram, so the figure drops to 0 and loses its green colour
+        const memEl = document.querySelector('[data-vital="mem"]');
+        memEl.textContent = up && v.memBytes != null ? (v.memBytes / 1048576).toFixed(0) + ' MB' : '0 MB';
+        memEl.classList.toggle('vital-green', up);
     }
 
     // rebuild the log box, one line per entry with the time on the left and the message on the right

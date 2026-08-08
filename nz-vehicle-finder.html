@@ -222,23 +222,27 @@ function apply(snap) {
         const up = isUp(v);
         setStatus(up);
         // this project's specific cpu usage, reads 0% when process is stopped
-        document.querySelector('[data-vital="cpu"]').textContent =
-            up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
+        const cpuEl = document.querySelector('[data-vital="cpu"]');
+        cpuEl.textContent = up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
+        cpuEl.classList.toggle('vital-green', up);
         // green if it's online and the port is open
         const pm2El = document.querySelector('[data-vital="pm2"]');
         const portEl = document.querySelector('[data-vital="port"]');
         const status = v.pm2Status ?? v.serviceStatus ?? '—';
         pm2El.textContent = status;
-        if (status === 'online' || status === 'active') pm2El.classList.add('vital-green');
+        pm2El.classList.toggle('vital-green', status === 'online' || status === 'active');
         if (v.portListening != null) {
             portEl.textContent = v.portListening ? 'open' : 'closed';
-            if (v.portListening) portEl.classList.add('vital-green');
+            portEl.classList.toggle('vital-green', v.portListening);
         }
         // pm2Uptime is the process start timestamp (ms since epoch), not an elapsed duration.
         // a stopped process has no uptime, so it reads 0m rather than keeping the old figure
         document.getElementById('uptime').textContent =
             up && v.pm2Uptime ? formatUptime((Date.now() - v.pm2Uptime) / 1000) : '0m';
-        if (v.memBytes != null) document.querySelector('[data-vital="mem"]').textContent = (v.memBytes / 1048576).toFixed(0) + ' MB';
+        // a stopped process holds no ram, so the figure drops to 0 and loses its green colour
+        const memEl = document.querySelector('[data-vital="mem"]');
+        memEl.textContent = up && v.memBytes != null ? (v.memBytes / 1048576).toFixed(0) + ' MB' : '0 MB';
+        memEl.classList.toggle('vital-green', up);
     }
 
     // rebuild the log box, one line per entry with the time on the left and the message on the right

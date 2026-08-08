@@ -213,8 +213,9 @@ function apply(snap) {
         setStatus(up);
         // nginx's specific cpu usage, so it reads 0% when nginx is stopped
         const v = snap.vitals?.['jedbillyb-com'];
-        document.querySelector('[data-vital="cpu"]').textContent =
-            up && v?.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
+        const cpuEl = document.querySelector('[data-vital="cpu"]');
+        cpuEl.textContent = up && v?.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
+        cpuEl.classList.toggle('vital-green', up);
         document.querySelector('[data-vital="disk"]').textContent =
             v?.diskBytes != null ? formatBytes(v.diskBytes) : '—';
 
@@ -226,11 +227,15 @@ function apply(snap) {
 
         const el = document.querySelector('[data-vital="nginx"]');
         el.textContent = sub;
-        if (sub === 'running') el.classList.add('vital-green');
+        el.classList.toggle('vital-green', sub === 'running');
+
+        // a stopped nginx holds no ram, so the figure drops to 0 and loses its green colour
         const mem = Number(nginx.MemoryCurrent);
-        if (Number.isFinite(mem) && mem > 0 && mem < Number.MAX_SAFE_INTEGER) {
-            document.querySelector('[data-vital="mem"]').textContent = (mem / 1048576).toFixed(0) + ' MB';
-        }
+        const memEl = document.querySelector('[data-vital="mem"]');
+        memEl.textContent = up && Number.isFinite(mem) && mem > 0 && mem < Number.MAX_SAFE_INTEGER
+            ? (mem / 1048576).toFixed(0) + ' MB'
+            : '0 MB';
+        memEl.classList.toggle('vital-green', up);
     }
 
     // rebuild the log box, one line per entry with the time on the left and the message on the right
