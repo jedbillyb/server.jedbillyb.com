@@ -10,6 +10,7 @@ import activityRoutes from './routes/activity.js';
 import projectsRoutes from './routes/projects.js';
 import statusRoutes from './routes/status.js';
 import streamRoutes from './routes/stream.js';
+import { startIncidentMonitor } from './utils/incident.js';
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -29,4 +30,6 @@ app.use('/api/stream', streamRoutes);
 
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`server-api running on :${PORT}`);
+  // records outages even when nobody has the page open
+  startIncidentMonitor().catch(err => console.error('incident monitor:', err.message));
 });

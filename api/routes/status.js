@@ -1,24 +1,19 @@
 import { Router } from 'express';
-import { execAsync } from '../utils/exec.js';
+import { failedServices } from '../utils/failed.js';
+import { lastIncident } from '../utils/incident.js';
 import os from 'os';
 
 const router = Router();
 
 export async function collectStatus() {
-  const failedOut = await execAsync(
-    'systemctl --failed --no-pager --no-legend'
-  ).catch(() => '');
-
-  const failedLines = failedOut.trim().split('\n').filter(l =>
-    l.trim() && !l.includes('0 loaded') && !l.includes('units listed')
-  );
+  const failed = await failedServices();
 
   const load = os.loadavg();
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
 
   return {
-    ok: failedLines.length === 0,
+    ok: failed === 0,
     uptime: os.uptime(),
     load,
     memory: {
@@ -26,7 +21,9 @@ export async function collectStatus() {
       free: freeMem,
       usedPercent: Math.round(((totalMem - freeMem) / totalMem) * 100),
     },
-    failedServices: failedLines.length,
+    failedServices: failed,
+    // when the last outage started, so the page doesn't have to remember it
+    lastIncident: lastIncident(),
   };
 }
 

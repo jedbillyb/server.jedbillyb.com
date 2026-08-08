@@ -50,6 +50,7 @@ export const projects = [
   },
   {
     slug: 'vehicle-api',
+    featured: true,
     name: 'NZ Vehicle Finder API',
     description: 'NZ motor vehicle register search API',
     pm2: 'vehicle-api',
@@ -74,6 +75,7 @@ export const projects = [
   },
   {
     slug: 'posthog-webhook',
+    featured: true,
     name: 'PostHog Webhook',
     description: 'Forwards PostHog analytics events to Telegram',
     service: 'posthog-webhook.service',
@@ -84,6 +86,7 @@ export const projects = [
   },
   {
     slug: 'openclaw',
+    featured: true,
     name: 'Openclaw',
     description: 'Personal AI agent with Telegram and Discord integration',
     port: 18789,
@@ -92,6 +95,7 @@ export const projects = [
   },
   {
     slug: 'jedbillyb-com',
+    featured: true,
     name: 'jedbillyb.com',
     description: 'Personal site - landing page, extensions, and server dashboard',
     service: 'nginx.service',
@@ -102,6 +106,7 @@ export const projects = [
   },
   {
     slug: 'minecraft',
+    featured: true,
     name: 'Minecraft SMP',
     description: 'Personal survival server, hosted in Pelican (Wings/Docker)',
     container: '4f849fc4-b3f1-4074-afda-1593b8ad14f2',

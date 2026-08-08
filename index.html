@@ -178,6 +178,15 @@
   // how many of the project cards are currently stopped, or null if nothing has been read yet
   let projectsDown = null;
 
+  // the api sends when the incident started, so the figure keeps counting up
+  function fmtAgo(ms) {
+    const s = Math.floor((Date.now() - ms) / 1000);
+    if (s < 60) return 'now';
+    if (s < 3600) return `${Math.floor(s / 60)}m`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h`;
+    return `${Math.floor(s / 86400)}d`;
+  }
+
   // code to fill in the four stats in the top right of the page, and the last incident time
   function applyStatus(d) {
     const val = n => document.querySelector(`.stat-row:nth-child(${n}) .stat-value`);
@@ -187,7 +196,7 @@
     val(2).textContent = fmtUptime(d.uptime);
     val(3).textContent = projectsDown === null ? '--'
       : projectsDown === 0 ? 'all running' : `${projectsDown} stopped`;
-    val(4).textContent = projectsDown === null ? '--' : degraded ? 'now' : 'none';
+    val(4).textContent = d.lastIncident ? fmtAgo(d.lastIncident.at) : 'none';
   }
 
   // code to put running or stopped in the corner of each project card
