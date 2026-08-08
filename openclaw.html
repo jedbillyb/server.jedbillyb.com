@@ -209,8 +209,9 @@ function apply(snap) {
         const cpuEl = document.querySelector('[data-vital="cpu"]');
         cpuEl.textContent = up && v.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
         cpuEl.classList.toggle('vital-green', up);
-        if (v.model) document.querySelector('[data-vital="model"]').textContent = v.model;
-        if (v.memoryFiles != null) document.querySelector('[data-vital="memory"]').textContent = v.memoryFiles + ' .md';
+        document.querySelector('[data-vital="model"]').textContent = v.model ?? '—';
+        document.querySelector('[data-vital="memory"]').textContent =
+            v.memoryFiles != null ? v.memoryFiles + ' .md' : '—';
         // a stopped process holds no ram, so the figure drops to 0 and loses its green colour
         const memEl = document.querySelector('[data-vital="mem"]');
         memEl.textContent = up && v.memBytes != null ? (v.memBytes / 1048576).toFixed(0) + ' MB' : '0 MB';

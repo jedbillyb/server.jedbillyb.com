@@ -172,18 +172,27 @@ export async function collectProjectVitals(project) {
         }).catch(() => {  })
       : Promise.resolve(),
     project.openclawHome
-      ? Promise.allSettled([
+      ? (async () => {
+          const home = project.openclawHome;
+          const [live, configured, files] = await Promise.all([
 
+            // the newest session transcript records the model each reply used
+            execAsync(`ls -t ${home}/agents/*/sessions/*.jsonl | head -1 | xargs -r tail -n 400 | grep -o '"model":"[^"]*"' | tail -1`)
+              .then(out => out.match(/"model":"([^"]+)"/)?.[1] ?? null).catch(() => null),
 
-          readFile(`${project.openclawHome}/openclaw.json`, 'utf8').then(raw => {
-            const primary = JSON.parse(raw)?.agents?.defaults?.model?.primary;
-            if (primary) vitals.model = primary.split('/').pop();
-          }),
+            readFile(`${home}/openclaw.json`, 'utf8')
+              .then(raw => JSON.parse(raw)?.agents?.defaults?.model?.primary?.split('/').pop() ?? null)
+              .catch(() => null),
 
-          readdir(`${project.openclawHome}/workspace`).then(files => {
-            vitals.memoryFiles = files.filter(f => f.endsWith('.md')).length;
-          }),
-        ])
+            readdir(`${home}/workspace`)
+              .then(f => f.filter(n => n.endsWith('.md')).length).catch(() => null),
+          ]);
+
+          // the config only holds the configured default, so a model switched at runtime
+          // never reaches it. the transcript is what's actually in use
+          if (live ?? configured) vitals.model = live ?? configured;
+          if (files != null) vitals.memoryFiles = files;
+        })()
       : Promise.resolve(),
   ]);
 
