@@ -52,9 +52,17 @@ body {
   user-select: none;
 }
 
-/* fade links when cursor is hovered over them */
+/* fade and underline links when hovered, so they read as clickable */
 .header a:hover {
   opacity: 0.6;
+  text-decoration: underline;
+}
+
+/* the page you are already on, shown but not clickable */
+.nav-current {
+  font-size: 14px;
+  font-family: inherit;
+  color: #aaa;
 }
 
 /* footer at the bottom of the page */

@@ -49,8 +49,15 @@ body {
   gap: 20px;
 }
 
-/* fade links when cursor is hovered over them */
-.header a:hover { opacity: 0.6; }
+/* fade and underline links when hovered, so they read as clickable */
+.header a:hover { opacity: 0.6; text-decoration: underline; }
+
+/* the page you are already on, shown but not clickable */
+.nav-current {
+  font-size: 14px;
+  font-family: inherit;
+  color: #aaa;
+}
 
 
 /* green strip under the navigation bar saying whether the server is healthy */
