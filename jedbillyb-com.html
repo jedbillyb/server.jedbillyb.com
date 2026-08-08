@@ -164,6 +164,8 @@
         <span>jed blenkhorn · 2026</span>
     </footer>
 
+<!-- shared helpers used by the script below -->
+<script src="/utils.js"></script>
 <script>
 // where all the live data comes from, the server's Api
 const API = 'https://server.jedbillyb.com/api';
@@ -248,8 +250,7 @@ function apply(snap) {
 }
 
 // open the live connection fromt the server and ask for the last 5 lines of the nginx log, updating every second
-const stream = new EventSource(`${API}/stream?vitals=jedbillyb-com&service=nginx.service&logs=nginx&logsLimit=5&interval=1000`);
-stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
+const stream = liveStream(`${API}/stream?vitals=jedbillyb-com&service=nginx.service&logs=nginx&logsLimit=5&interval=1000`, apply);
 </script>
 </body>
 

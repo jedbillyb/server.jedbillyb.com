@@ -384,6 +384,27 @@ body {
 }
 
 /* mobile layout */
+/* neither running or stopped. the api can't be reached, so nothing is known */
+.project-status-unknown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #bbb;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.status-dot-unknown {
+  width: 6px;
+  height: 6px;
+  background-color: #ddd;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 @media (max-width: 700px) {
 
   /* the site name and the three links will not fit across a phone,

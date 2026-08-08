@@ -91,6 +91,15 @@ body {
 /* dot turns orange when something needs attention */
 .banner-dot.warn { background: #e5a020; }
 
+/* neutral grey while the api can't be reached */
+.status-banner.unknown {
+  background: #f5f5f5;
+  border-bottom-color: #ddd;
+  color: #999;
+}
+
+.banner-dot.unknown { background: #ccc; }
+
 /* the whole strip turns amber */
 .status-banner.warn {
   background: #fdf7ec;

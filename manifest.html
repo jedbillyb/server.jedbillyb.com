@@ -296,7 +296,7 @@ function apply(snap) {
         document.getElementById('banner-sub').textContent =
             `${allServices.length} services running · ${tracked.length - down} of ${tracked.length} project services up`;
         document.getElementById('banner-dot').className = down > 0 ? 'banner-dot warn' : 'banner-dot';
-        document.querySelector('.status-banner').classList.toggle('warn', down > 0);
+        document.querySelector('.status-banner').className = down > 0 ? 'status-banner warn' : 'status-banner';
     }
 
     // the 8 busiest processes
@@ -332,8 +332,7 @@ function apply(snap) {
 // starts everything once the page loads. the connection to the server is then opened, updating every 2 seconds
 document.getElementById('map-region').textContent = 'silverwater, nsw';
 loadLocation();
-const stream = new EventSource(`${API}/stream?system=1&services=1&projects=1&processes=8&docker=1&interval=2000`);
-stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
+const stream = liveStream(`${API}/stream?system=1&services=1&projects=1&processes=8&docker=1&interval=2000`, apply);
 </script>
 </body>
 

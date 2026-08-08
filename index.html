@@ -268,8 +268,7 @@
     if (stream) stream.close();
     const params = new URLSearchParams({ status: '1', activity: String(logLimit), interval: '2000' });
     if (slugs.length) params.set('vitals', slugs.join(','));
-    stream = new EventSource(`/api/stream?${params}`);
-    stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
+    stream = liveStream(`/api/stream?${params}`, apply);
   }
 
   // logic when window is resized to recalculate how many log rows fit in the box

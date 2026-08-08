@@ -229,8 +229,7 @@ function apply(snap) {
 }
 
 // open the live connection from the server and ask for the last 7 lines of the log, updating every second
-const stream = new EventSource(`${API}/stream?vitals=openclaw&projectLogs=openclaw&logsLimit=7&interval=1000`);
-stream.onmessage = ev => { try { apply(JSON.parse(ev.data)); } catch {} };
+const stream = liveStream(`${API}/stream?vitals=openclaw&projectLogs=openclaw&logsLimit=7&interval=1000`, apply);
 </script>
 </body>
 
