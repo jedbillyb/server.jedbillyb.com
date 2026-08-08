@@ -187,9 +187,19 @@ export async function collectProjectVitals(project) {
           const home = project.openclawHome;
           const [live, configured, files] = await Promise.all([
 
-            // the newest session transcript records the model each reply used
-            execAsync(`ls -t ${home}/agents/*/sessions/*.jsonl | head -1 | xargs -r tail -n 400 | grep -o '"model":"[^"]*"' | tail -1`)
-              .then(out => out.match(/"model":"([^"]+)"/)?.[1] ?? null).catch(() => null),
+            readdir(`${home}/agents`)
+              .then(async names => {
+                const indexes = await Promise.all(names.map(name =>
+                  readFile(`${home}/agents/${name}/sessions/sessions.json`, 'utf8')
+                    .then(raw => Object.values(JSON.parse(raw))).catch(() => [])
+                ));
+
+                const when = s => s.lastInteractionAt ?? s.updatedAt ?? 0;
+
+                return indexes.flat()
+                  .filter(s => s?.model)
+                  .sort((a, b) => when(b) - when(a))[0]?.model ?? null;
+              }).catch(() => null),
 
             readFile(`${home}/openclaw.json`, 'utf8')
               .then(raw => JSON.parse(raw)?.agents?.defaults?.model?.primary?.split('/').pop() ?? null)
@@ -199,8 +209,8 @@ export async function collectProjectVitals(project) {
               .then(f => f.filter(n => n.endsWith('.md')).length).catch(() => null),
           ]);
 
-          // the config only holds the configured default, so a model switched at runtime
-          // never reaches it. the transcript is what's actually in use
+          // the session says which model is active, the config only says
+          // which one new sessions start on, so the session wins where there is one
           if (live ?? configured) vitals.model = live ?? configured;
           if (files != null) vitals.memoryFiles = files;
         })()
