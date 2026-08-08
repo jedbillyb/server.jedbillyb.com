@@ -348,6 +348,29 @@ body {
 
 /* mobile layout */
 @media (max-width: 700px) {
+
+  /* the site name and the three links will not fit across a phone,
+     so the navigation bar drops it onto its own line under the name */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 16px;
+  }
+
+  .header-left {
+    flex-wrap: wrap;
+  }
+
+  .header-right {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .header a,
+  .nav-current {
+    font-size: 13px;
+  }
   /* stat cards, two per row */
   .stat-cards { grid-template-columns: 1fr 1fr; }
 
