@@ -84,6 +84,13 @@ body {
 /* dot turns orange when something needs attention */
 .banner-dot.warn { background: #e5a020; }
 
+/* the whole strip turns amber */
+.status-banner.warn {
+  background: #fdf7ec;
+  border-bottom-color: #e6d3a8;
+  color: #8a6414;
+}
+
 /* the bold line of the banner */
 .banner-title {
   font-size: 13px;

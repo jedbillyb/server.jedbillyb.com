@@ -274,15 +274,10 @@ function apply(snap) {
         const allServices = Array.isArray(snap.services) ? snap.services : (snap.services.services ?? []);
         const projects = Array.isArray(snap.projects) ? snap.projects : [];
 
-        // count what's up and what isn't. if anything is down the banner dot goes amber
-        const running = allServices.filter(s => s.active === 'active').length;
-        const stopped = allServices.length - running;
-        document.getElementById('banner-sub').textContent = `${running} services running · ${stopped} stopped · last incident 12d ago`;
-        if (stopped > 0) { document.getElementById('banner-dot').className = 'banner-dot warn'; }
-
         // build one table row per project, with a green or grey dot next to it
         const serviceMap = Object.fromEntries(allServices.map(s => [s.unit, s]));
-        const keyServices = projects.filter(p => p.service).map(p => {
+        const tracked = projects.filter(p => p.service);
+        const keyServices = tracked.map(p => {
             const s = serviceMap[p.service] ?? {};
             const up = s.active === 'active';
             return `<tr>
@@ -292,6 +287,16 @@ function apply(snap) {
             </tr>`;
         });
         document.getElementById('services-body').innerHTML = keyServices.join('') || '<tr><td colspan="3">no data</td></tr>';
+
+        // systemd drops a stopped unit off the list altogether, so I need to count the projects missing from it
+        const down = tracked.filter(p => serviceMap[p.service]?.active !== 'active').length;
+        document.getElementById('banner-title').textContent = down === 0
+            ? 'All systems operational'
+            : `${down} project service${down === 1 ? '' : 's'} down`;
+        document.getElementById('banner-sub').textContent =
+            `${allServices.length} services running · ${tracked.length - down} of ${tracked.length} project services up`;
+        document.getElementById('banner-dot').className = down > 0 ? 'banner-dot warn' : 'banner-dot';
+        document.querySelector('.status-banner').classList.toggle('warn', down > 0);
     }
 
     // the 8 busiest processes
