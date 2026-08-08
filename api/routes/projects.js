@@ -4,6 +4,7 @@ import { execAsync } from '../utils/exec.js';
 import { inspectContainer } from '../utils/container.js';
 import { mcPing } from '../utils/mcping.js';
 import { cpuPercent, resetCpu } from '../utils/cpu.js';
+import { siteUptime } from '../utils/siteUptime.js';
 import { projects } from '../config/projects.js';
 
 const router = Router();
@@ -35,6 +36,16 @@ export async function collectProjectVitals(project) {
 
 
   if (project.mcVersion) vitals.version = project.mcVersion;
+
+  // a static site has no specific process of its own, so its uptime comes from the probe
+  // that has been requesting the page in the background
+  if (project.probe) {
+    const site = siteUptime(project.slug);
+    if (site) {
+      vitals.siteUp = site.up;
+      vitals.siteUptimeSeconds = site.seconds;
+    }
+  }
 
   await Promise.allSettled([
     project.container

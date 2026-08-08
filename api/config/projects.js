@@ -103,6 +103,8 @@ export const projects = [
     url: 'https://jedbillyb.com',
     // measure how much space the site's own files take up
     diskUsage: true,
+    // request the site from nginx every tick
+    probe: { host: 'jedbillyb.com', path: '/' },
   },
   {
     slug: 'minecraft',

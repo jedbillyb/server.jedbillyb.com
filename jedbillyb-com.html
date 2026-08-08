@@ -132,7 +132,7 @@
                             <div class="vital-value" data-vital="disk">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label">web server</div>
+                            <div class="vital-label">site status</div>
                             <div class="vital-value" data-vital="nginx">—</div>
                         </div>
                     </div>
@@ -210,26 +210,30 @@ function apply(snap) {
     // this site is just files served by nginx, so its health is nginx's health
     const nginx = snap.service?.['nginx.service'];
     if (nginx) {
-        const sub = nginx.SubState ?? nginx.sub ?? '—';
-        const up = nginx.ActiveState === 'active';
+        const v = snap.vitals?.['jedbillyb-com'];
+
+        // the server requests the page every few seconds. the answer is what
+        // decides the status.
+        const up = v?.siteUp ?? (nginx.ActiveState === 'active');
         setStatus(up);
         // nginx's specific cpu usage, so it reads 0% when nginx is stopped
-        const v = snap.vitals?.['jedbillyb-com'];
         const cpuEl = document.querySelector('[data-vital="cpu"]');
         cpuEl.textContent = up && v?.cpuPercent != null ? v.cpuPercent.toFixed(1) + '%' : '0%';
         cpuEl.classList.toggle('vital-green', up);
         document.querySelector('[data-vital="disk"]').textContent =
             v?.diskBytes != null ? formatBytes(v.diskBytes) : '—';
 
-        // ActiveEnterTimestamp is when nginx last started, e.g. "Wed 2026-07-22 06:59:29 UTC".
-        // this is nginx's own uptime, not the whole server's, so it drops to 0m when nginx stops
-        const since = Date.parse(String(nginx.ActiveEnterTimestamp ?? '').replace(/^[A-Za-z]{3}\s/, ''));
+        // how long the site itself has been answering, counted from the first successful
+        // probe after the last failed one, so it drops to 0m the moment the site stops
+        // being served rather than only when the nginx unit stops
         document.getElementById('uptime').textContent =
-            up && Number.isFinite(since) ? formatUptime((Date.now() - since) / 1000) : '0m';
+            up && v?.siteUptimeSeconds ? formatUptime(v.siteUptimeSeconds) : '0m';
 
+        // this vital is about the site, not nginx, so it follows the same answer the
+        // header does. nginx being up is not enough if the site is not being served
         const el = document.querySelector('[data-vital="nginx"]');
-        el.textContent = sub;
-        el.classList.toggle('vital-green', sub === 'running');
+        el.textContent = up ? 'running' : 'stopped';
+        el.classList.toggle('vital-green', up);
 
         // a stopped nginx holds no ram, so the figure drops to 0 and loses its green colour
         const mem = Number(nginx.MemoryCurrent);
