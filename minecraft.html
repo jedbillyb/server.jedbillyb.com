@@ -111,7 +111,7 @@
                     <div class="vitals-grid">
                         <div class="vital">
                             <div class="vital-label">state</div>
-                            <div class="vital-value vital-value-lg vital-red" id="vital-state">—</div>
+                            <div class="vital-value vital-value-lg" id="vital-state">—</div>
                         </div>
                         <div class="vital">
                             <div class="vital-label" id="lastup-label">last seen up</div>
@@ -181,7 +181,6 @@ function apply(snap) {
         document.getElementById('status-badge').className = isRunning ? 'project-status' : 'project-status-stopped';
         document.getElementById('status-dot').className = isRunning ? 'status-dot' : 'status-dot-stopped';
         stateEl.classList.toggle('vital-green', isRunning);
-        stateEl.classList.toggle('vital-red', !isRunning);
         document.getElementById('subtitle').textContent =
             `personal survival server · ${isRunning ? 'online' : 'offline'}`;
 
