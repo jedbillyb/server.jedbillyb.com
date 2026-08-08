@@ -107,22 +107,22 @@
 
                 <!-- four live vitals, all dashes until the page loads -->
                 <div class="card">
-                    <div class="card-header">// vitals</div>
+                    <div class="card-header">// vitals · live readings for this project</div>
                     <div class="vitals-grid">
                         <div class="vital">
                             <div class="vital-label">state</div>
                             <div class="vital-value vital-value-lg vital-red" id="vital-state">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label" id="lastup-label">last up</div>
+                            <div class="vital-label" id="lastup-label">last seen up</div>
                             <div class="vital-value vital-value-lg" id="vital-lastup">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label">memory</div>
+                            <div class="vital-label">memory used</div>
                             <div class="vital-value" data-vital="heap">—</div>
                         </div>
                         <div class="vital">
-                            <div class="vital-label">players</div>
+                            <div class="vital-label">players online</div>
                             <div class="vital-value" id="vital-players">—</div>
                         </div>
                     </div>
@@ -186,10 +186,10 @@ function apply(snap) {
             `personal survival server · ${isRunning ? 'online' : 'offline'}`;
 
         document.getElementById('status-text').innerHTML =
-            `${esc(state)} · pelican · <span id="status-since">${esc(v.last_up ?? '—')}</span>`;
+            `${esc(state)} · pelican · ${isRunning ? 'up' : 'down'} <span id="status-since">${esc(v.last_up ?? '—')}</span>`;
 
         // when service is running the vital is uptime, when down it's how long since stop/crash
-        document.getElementById('lastup-label').textContent = isRunning ? 'uptime' : 'last up';
+        document.getElementById('lastup-label').textContent = isRunning ? 'running for' : 'last seen up';
         document.getElementById('vital-lastup').textContent = v.last_up ?? '—';
         // nobody can be online while the server is down, but a failed ping means we genuinely don't know
         document.getElementById('vital-players').textContent =
