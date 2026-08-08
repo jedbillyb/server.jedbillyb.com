@@ -191,9 +191,9 @@ function apply(snap) {
         // when service is running the vital is uptime, when down it's how long since stop/crash
         document.getElementById('lastup-label').textContent = isRunning ? 'uptime' : 'last up';
         document.getElementById('vital-lastup').textContent = v.last_up ?? '—';
-        if (v.players != null) {
-            document.getElementById('vital-players').textContent = v.players;
-        }
+        // nobody can be online while the server is down, but a failed ping means we genuinely don't know
+        document.getElementById('vital-players').textContent =
+            !isRunning ? '0/—' : (v.players ?? '—');
         // docker reports memory as "11.15GiB", and 0B when the container isn't reporting anything
         const mem = v.heap && !v.heap.startsWith('0B')
             ? v.heap.replace(/([\d.]+)([A-Za-z]+)/, '$1 $2')
