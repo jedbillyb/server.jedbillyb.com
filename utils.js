@@ -21,8 +21,11 @@ function setApiOnline(online) {
     apiOnline = online;
     if (online) return;
 
+    // the colour is a claim about health just as much as the number is, so a green
+    // dash would still read as "fine" while the api is unreachable
     document.querySelectorAll('[data-vital], .vital-value, .stat-value').forEach(el => {
         el.textContent = '—';
+        el.classList.remove('vital-green', 'vital-red');
     });
     document.querySelectorAll('.box-status').forEach(el => {
         el.textContent = '—';
