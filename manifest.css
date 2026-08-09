@@ -63,8 +63,11 @@ body {
 /* green strip under the navigation bar saying whether the server is healthy */
 .status-banner {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  /* once the two halves no longer fit side by side they stack to make text readable */
+  gap: 4px 24px;
   padding: 10px 20px;
   background: #f0faf4;
   border-bottom: 1px solid #b8e0c8;
@@ -77,6 +80,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 /* the green dot in the banner */
@@ -117,8 +121,10 @@ body {
 /* the faded second line of the banner */
 .banner-sub { opacity: 0.75; }
 
-/* the faded text on the right of the banner */
-.banner-right { opacity: 0.85; }
+.banner-right {
+  opacity: 0.85;
+  white-space: nowrap;
+}
 
 
 /* the main content area */
@@ -380,6 +386,17 @@ body {
   .nav-current {
     font-size: 13px;
   }
+  /* uptime and load will not fit beside the status text on a phone, so they drop
+     onto their own line */
+  .status-banner {
+    padding: 10px 16px;
+  }
+
+  .banner-right {
+    width: 100%;
+    padding-left: 19px;
+  }
+
   /* stat cards, two per row */
   .stat-cards { grid-template-columns: 1fr 1fr; }
 
