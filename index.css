@@ -208,7 +208,23 @@ body {
 
 /* darken the card border when hovered */
 .box:hover {
-  border-color: #aaa;
+  border-color: #5B9BD5;
+  box-shadow: 0 4px 12px rgba(26, 35, 50, 0.14);
+  transform: translateY(-3px);
+}
+
+.box {
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .box {
+    transition: none;
+  }
+
+  .box:hover {
+    transform: none;
+  }
 }
 
 /* top section of the card */
