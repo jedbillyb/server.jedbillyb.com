@@ -216,9 +216,9 @@ body {
 
 /* short description under the project name */
 .box-desc {
-  font-size: 13px;
-  color: #555;
-  line-height: 1.5;
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
 }
 
 /* bottom row of the card, tags on the left and status on the right */
