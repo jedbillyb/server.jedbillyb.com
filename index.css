@@ -299,6 +299,20 @@ body {
   overflow: hidden;
 }
 
+/* the list of log rows */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* column headings above the feed */
+.log-head {
+  color: #8a94a3;
+}
+
 /* one row in the recent logs section */
 .log-row {
   display: grid;

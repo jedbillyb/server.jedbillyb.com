@@ -146,10 +146,19 @@
 
 </div>
 
-<span class="breadcrumb-sub-recent-logs"><i data-lucide="scroll-text"></i>// recent logs</span>
+<!-- label explains what the feed is -->
+<span class="breadcrumb-sub-recent-logs"><i data-lucide="scroll-text"></i>// recent logs · what the services have been doing, newest first</span>
 
 <!-- live log feed, fills itself in automaticly -->
-<div class="box-recent-logs" id="recent-logs"></div>
+<div class="box-recent-logs">
+    <!-- names of the three columns -->
+    <div class="log-row log-head">
+        <span>time</span>
+        <span>service</span>
+        <span>what it reported</span>
+    </div>
+    <div class="log-list" id="recent-logs"></div>
+</div>
 
 <!-- footer of the page -->
 <footer class="footer">jed blenkhorn · 2026</footer>
@@ -262,10 +271,10 @@
 
   // list of the projects on the page, used to ask the server Api for only the vitals we need speicfically
   const slugs = [...document.querySelectorAll('[data-slug]')].map(b => b.dataset.slug);
-  const logsBox = document.querySelector('.box-recent-logs');
+  const logsBox = document.getElementById('recent-logs');
 
-  // calculates how many log rows fit in the box
-  const rowsThatFit = () => Math.max(3, Math.floor((logsBox.clientHeight - 14) / 30));
+  // calculates how many log rows fit in the list
+  const rowsThatFit = () => Math.max(3, Math.floor(logsBox.clientHeight / 30));
 
   // open the live connection to the server, asking for as many log rows as calculated.
   // if the count hasn't changed then the existing connection is left alone
