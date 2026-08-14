@@ -126,24 +126,21 @@ body {
   opacity: 0.6;
 }
 
-/* "// projects" label */
-.breadcrumb-sub-projects {
-  display: block;
+.breadcrumb-sub-projects,
+.breadcrumb-sub-recent-logs {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
   font-size: 13px;
+  line-height: 1.5;
   color: #7A8593;
-  margin-top: 0;
-  margin-left: 20px;
-  margin-bottom: -20px;
+  margin: 0 20px 8px 20px;
 }
 
-/* "// recent logs" label above the log feed */
-.breadcrumb-sub-recent-logs {
-  display: block;
-  font-size: 13px;
-  color: #7A8593;
-  margin-top: 0;
-  margin-left: 20px;
-  margin-bottom: 8px;
+/* keep the icon at its natural size when the text next to it wraps */
+.breadcrumb-sub-projects svg,
+.breadcrumb-sub-recent-logs svg {
+  flex: none;
 }
 
 /* the right-hand column containing the stats */
@@ -185,12 +182,12 @@ body {
   color: #c0392b;
 }
 
-/* project cards container */
+/* project cards container*/
 .container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  padding: 40px 20px 20px 20px;
+  padding: 0 20px 20px 20px;
 }
 
 /* project card with a footer */
@@ -203,7 +200,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 140px;
+  /* stops a one-line card from collapsing */
+  min-height: 110px;
 }
 
 /* darken the card border when hovered */
@@ -247,11 +245,14 @@ body {
   line-height: 1.6;
 }
 
-/* bottom row of the card, tags on the left and status on the right */
+/* bottom row of the card, wraps so a long tag list drops the pill
+   onto its own line instead of running underneath it. */
 .box-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 20px;
 }
 
@@ -433,8 +434,16 @@ body {
   /* project cards go one per row */
   .container {
     grid-template-columns: 1fr;
-    padding: 20px;
+    padding: 0 20px 20px 20px;
     gap: 12px;
+  }
+
+  .box {
+    min-height: 0;
+  }
+
+  .box-footer {
+    margin-top: 16px;
   }
 
   /* log lines drop the service column to make room for the message */
@@ -454,5 +463,8 @@ body {
   width: 13px;
   height: 13px;
   vertical-align: -2px;
+}
+
+.breadcrumb-sub-home svg {
   margin-right: 5px;
 }
