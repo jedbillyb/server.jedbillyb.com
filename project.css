@@ -61,11 +61,16 @@ body {
   text-decoration: underline;
 }
 
+/* blue links on the right of the navigation bar */
+.header-right a {
+  color: #1F6FEB;
+}
+
 /* the page you are already on, shown but not clickable */
 .nav-current {
   font-size: 14px;
   font-family: inherit;
-  color: #aaa;
+  color: #6B7480;
 }
 
 /* footer at the bottom of the page */

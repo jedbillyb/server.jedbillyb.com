@@ -36,9 +36,9 @@ body {
   font-size: 14px;
 }
 
-/* greyed out links on the right of the navigation bar */
+/* blue links on the right of the navigation bar */
 .header-right a {
-  color: #7A8593;
+  color: #1F6FEB;
 }
 
 /* bold link/logo text */
@@ -82,7 +82,7 @@ body {
 .nav-current {
   font-size: 14px;
   font-family: inherit;
-  color: #aaa;
+  color: #6B7480;
 }
 
 /* heading area, title on the left and stats on the right */
