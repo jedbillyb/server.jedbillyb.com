@@ -11,6 +11,8 @@ body {
 
 /* navigation bar, link/logo on the left and external links pushed to the right */
 .header {
+  position: sticky;
+  top: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -18,6 +20,7 @@ body {
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   font-family: 'JetBrains Mono', monospace;
+  z-index: 1000;
 }
 
 /* black text links in the navigation bar */

@@ -17,13 +17,16 @@ body {
 
 /* navigation bar, link/logo on the left and external links pushed to the right */
 .header {
-  text-decoration: none;
+  position: sticky;
+  top: 0;
   display: flex;
   justify-content: space-between;
+  text-decoration: none;
   align-items: center;
   padding: 12px 20px;
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
+  z-index: 1000;
 }
 
 /* black text links in the navigation bar */
