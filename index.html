@@ -202,10 +202,18 @@
     const val = n => document.querySelector(`.stat-row:nth-child(${n}) .stat-value`);
     const degraded = projectsDown > 0 || d.failedServices > 0;
 
+    // the class is swapped rather than added
+    const paint = (el, healthy) => {
+      el.className = healthy === null ? 'stat-value'
+        : healthy ? 'stat-value vital-green' : 'stat-value vital-red';
+    };
+
     val(1).textContent = projectsDown === null ? '--' : degraded ? 'degraded' : 'online';
+    paint(val(1), projectsDown === null ? null : !degraded);
     val(2).textContent = fmtUptime(d.uptime);
     val(3).textContent = projectsDown === null ? '--'
       : projectsDown === 0 ? 'all running' : `${projectsDown} stopped`;
+    paint(val(3), projectsDown === null ? null : projectsDown === 0);
     val(4).textContent = d.lastIncident ? fmtAgo(d.lastIncident.at) : 'none';
   }
 

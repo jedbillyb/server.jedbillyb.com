@@ -175,6 +175,16 @@ body {
   gap: 6px;
 }
 
+/* healthy stat*/
+.vital-green {
+  color: #2a7a3b;
+}
+
+/* something is stopped or degraded */
+.vital-red {
+  color: #c0392b;
+}
+
 /* project cards container */
 .container {
   display: grid;
