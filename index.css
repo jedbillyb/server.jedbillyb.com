@@ -260,6 +260,16 @@ body {
   color: #bbb;
 }
 
+/* blue pill naming the manifest as server-tool */
+.box-tool {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background-color: #d7e7f5;
+  color: #2b6ca3;
+  white-space: nowrap;
+}
+
 /* the manifest card with a blue tint to stand out from the projects */
 .box-manifest {
   background-color: #E8F1F8;
