@@ -134,7 +134,8 @@ body {
   font-size: 13px;
   line-height: 1.5;
   color: #7A8593;
-  margin: 0 20px 8px 20px;
+  /* top margin separates the label from the block that ends above it */
+  margin: 28px 20px 8px 20px;
 }
 
 /* keep the icon at its natural size when the text next to it wraps */
