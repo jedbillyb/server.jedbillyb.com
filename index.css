@@ -24,8 +24,8 @@ body {
   text-decoration: none;
   align-items: center;
   padding: 12px 20px;
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: #E3E6EA;
+  border-bottom: 1px solid #C9CED6;
   z-index: 1000;
 }
 
@@ -38,7 +38,7 @@ body {
 
 /* blue links on the right of the navigation bar */
 .header-right a {
-  color: #1F6FEB;
+  color: #1558B0;
 }
 
 /* bold link/logo text */
