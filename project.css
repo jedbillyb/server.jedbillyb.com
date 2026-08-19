@@ -70,7 +70,7 @@ body {
 .nav-current {
   font-size: 14px;
   font-family: inherit;
-  color: #6B7480;
+  color: #5F6875;
 }
 
 /* footer at the bottom of the page */
@@ -81,7 +81,7 @@ body {
   padding: 12px 20px;
   text-align: right;
   font-size: 13px;
-  color: #888;
+  color: #5F6875;
 }
 
 /* "// home" label above the title */
@@ -101,7 +101,7 @@ body {
 
 /* the back link in the footer */
 .footer-back {
-  color: #888;
+  color: #5F6875;
   text-decoration: none;
   font-size: 13px;
 }
@@ -127,7 +127,7 @@ body {
 /* small grey label above the project title */
 .project-label {
   font-size: 12px;
-  color: #999;
+  color: #5F6875;
   margin-bottom: 6px;
 }
 
@@ -142,7 +142,7 @@ body {
 /* the description under the project name */
 .project-subtitle {
   font-size: 13px;
-  color: #999;
+  color: #5F6875;
 }
 
 /* green "running" pill in the top right */
@@ -191,7 +191,7 @@ body {
 
 /* the greyed-out label part inside of a link button */
 .link-tag {
-  color: #888;
+  color: #5F6875;
 }
 
 /* main content grid */
@@ -221,7 +221,7 @@ body {
 /* the small grey title bar at the top of a card */
 .card-header {
   font-size: 12px;
-  color: #999;
+  color: #5F6875;
   padding: 10px 16px;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -261,7 +261,7 @@ body {
 
 /* left column of the stack table */
 .stack-key {
-  color: #999;
+  color: #5F6875;
   padding: 9px 16px;
   width: 110px;
   font-size: 12px;
@@ -287,7 +287,7 @@ body {
 /* the name of a vital */
 .vital-label {
   font-size: 11px;
-  color: #999;
+  color: #5F6875;
   margin-bottom: 3px;
 }
 
@@ -318,7 +318,7 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #999;
+  color: #5F6875;
   border: 1px solid #bbb;
   border-radius: 999px;
   padding: 4px 12px;
@@ -352,7 +352,7 @@ body {
 /* column headings above the log feed */
 .log-head .log-time,
 .log-head .log-text {
-  color: #6B7480;
+  color: #5F6875;
 }
 
 /* one log line, time then message */
@@ -364,13 +364,13 @@ body {
 
 /* the time on the left of a log line */
 .log-time {
-  color: #999;
+  color: #5F6875;
   min-width: 32px;
 }
 
 /* the log message */
 .log-text {
-  color: #bbb;
+  color: #4F5866;
 }
 
 /* colour a log line */
@@ -411,7 +411,7 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #bbb;
+  color: #5F6875;
   border: 1px solid #ddd;
   border-radius: 999px;
   padding: 4px 12px;
