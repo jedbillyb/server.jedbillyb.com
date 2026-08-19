@@ -250,7 +250,8 @@
       const time = dayjs(ts).format('HH:mm');
       const ago = dayjs(ts).fromNow();
       const color = SERVICE_COLORS[unit] || '#4aab8a';
-      return `<div class="log-row">
+      const cls = stateClass(e.MESSAGE || '');
+      return `<div class="log-row ${cls}">
         <span class="log-time" title="${ago}">${time}</span>
         <span class="log-service" style="color:${color}">${unit}</span>
         <span class="log-msg">${msg}</span>

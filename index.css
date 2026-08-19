@@ -381,6 +381,19 @@ body {
   text-overflow: ellipsis;
 }
 
+/* a start or stop event */
+.log-green .log-msg {
+  color: #15803D;
+}
+
+.log-red .log-msg {
+  color: #B42318;
+}
+
+.log-state .log-msg {
+  font-weight: 500;
+}
+
 /* footer at the bottom of the page */
 .footer {
   background-color: #fff;
