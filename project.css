@@ -375,15 +375,20 @@ body {
 
 /* colour a log line */
 .log-green .log-text {
-  color: #4ec994;
+  color: #15803D;
 }
 
 .log-yellow .log-text {
-  color: #c9a84e;
+  color: #8A6D1F;
 }
 
 .log-red .log-text {
-  color: #e05c5c;
+  color: #B42318;
+}
+
+/* a start or stop event */
+.log-state .log-text {
+  font-weight: 500;
 }
 
 /* row of links to the other projects at the bottom of the page */

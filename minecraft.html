@@ -210,7 +210,7 @@ function apply(snap) {
         document.getElementById('log-body').innerHTML = entries.map(e => {
             const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
             const msg = e.MESSAGE ?? '';
-            const cls = logClass(msg);
+            const cls = stateClass(msg) || logClass(msg);
             return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
         }).join('');
     }

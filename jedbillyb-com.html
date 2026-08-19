@@ -252,7 +252,9 @@ function apply(snap) {
     if (Array.isArray(snap.logs) && snap.logs.length) {
         document.getElementById('log-body').innerHTML = snap.logs.map(e => {
             const ts = e.__REALTIME_TIMESTAMP ? tsToTime(e.__REALTIME_TIMESTAMP) : '—:—';
-            return `<div class="log-line"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(e.MESSAGE ?? '')}</span></div>`;
+            const msg = e.MESSAGE ?? '';
+            const cls = stateClass(msg);
+            return `<div class="log-line ${cls}"><span class="log-time">${esc(ts)}</span><span class="log-text">${esc(msg)}</span></div>`;
         }).join('');
     }
 }

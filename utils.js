@@ -8,6 +8,15 @@ function fmtUptime(s) {
     return dayjs.duration(s, 'seconds').humanize();
 }
 
+// a line reporting the service starting or stopping is picked out from the ordinary lines
+function stateClass(msg) {
+    const s = String(msg ?? '');
+    if (/^(Started|Starting)\b/.test(s) || /\bDone \(/.test(s)) return 'log-green log-state';
+    if (/^(Stopped|Stopping)\b/.test(s)
+        || /\b(Deactivated successfully|Main process exited|Failed with result|Stopping server)\b/.test(s)) return 'log-red log-state';
+    return '';
+}
+
 function tsToTime(usec) {
     return new Date(Number(usec) / 1000).toLocaleTimeString('en-NZ', {
         hour: '2-digit', minute: '2-digit', hour12: false
