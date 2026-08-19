@@ -342,6 +342,19 @@ body {
   gap: 5px;
 }
 
+/* the log feed sits under the column headings */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* column headings above the log feed */
+.log-head .log-time,
+.log-head .log-text {
+  color: #6B7480;
+}
+
 /* one log line, time then message */
 .log-line {
   font-size: 12px;
