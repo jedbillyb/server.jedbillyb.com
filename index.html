@@ -195,6 +195,14 @@
     return `${Math.floor(s / 86400)}d`;
   }
 
+  // says if something is down right now or has come back up
+  function fmtIncident(inc) {
+    if (!inc) return 'none';
+    const ago = fmtAgo(inc.at);
+    if (inc.ongoing) return ago === 'now' ? 'down just now' : `down for ${ago}`;
+    return ago === 'now' ? 'went down just now' : `went down ${ago} ago`;
+  }
+
   // code to fill in the four stats in the top right of the page, and the last incident time
   function applyStatus(d) {
     const val = n => document.querySelector(`.stat-row:nth-child(${n}) .stat-value`);
@@ -212,7 +220,8 @@
     val(3).textContent = projectsDown === null ? '--'
       : projectsDown === 0 ? 'all running' : `${projectsDown} stopped`;
     paint(val(3), projectsDown === null ? null : projectsDown === 0);
-    val(4).textContent = d.lastIncident ? fmtAgo(d.lastIncident.at) : 'none';
+    val(4).textContent = fmtIncident(d.lastIncident);
+    paint(val(4), d.lastIncident ? !d.lastIncident.ongoing : null);
   }
 
   // code to put running or stopped in the corner of each project card
