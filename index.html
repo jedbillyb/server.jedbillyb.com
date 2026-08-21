@@ -250,9 +250,24 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  const PIN_FOR_MS = 15 * 60 * 1000;
+  function pickRows(entries, rows) {
+    const tail = entries.slice(-rows);
+
+    const fresh = e => !e.__REALTIME_TIMESTAMP
+      || Date.now() - Number(e.__REALTIME_TIMESTAMP) / 1000 < PIN_FOR_MS;
+    const state = entries.filter(e => stateClass(e.MESSAGE || '') && fresh(e));
+    if (!state.length) return tail;
+
+    const keep = new Set(state.slice(-rows));
+    for (let i = tail.length - 1; i >= 0 && keep.size < rows; i--) keep.add(tail[i]);
+
+    return entries.filter(e => keep.has(e)).slice(-rows);
+  }
+
   // build the log feed, one row per line
   function applyActivity(entries) {
-    document.getElementById('recent-logs').innerHTML = entries.map(e => {
+    document.getElementById('recent-logs').innerHTML = pickRows(entries, rowsThatFit()).map(e => {
       const unit = esc((e._SYSTEMD_UNIT || e.SYSLOG_IDENTIFIER || 'unknown').replace('.service', ''));
       const msg = esc(e.MESSAGE || '');
       const ts = e.__REALTIME_TIMESTAMP ? new Date(Number(e.__REALTIME_TIMESTAMP) / 1000) : new Date();
@@ -301,7 +316,11 @@
     if (logLimit === lastLimit && stream) return;
     lastLimit = logLimit;
     if (stream) stream.close();
-    const params = new URLSearchParams({ status: '1', activity: String(logLimit), interval: '2000' });
+    const params = new URLSearchParams({
+      status: '1',
+      activity: String(Math.min(logLimit * 6, 100)),
+      interval: '2000',
+    });
     if (slugs.length) params.set('vitals', slugs.join(','));
     stream = liveStream(`/api/stream?${params}`, apply);
   }

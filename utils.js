@@ -8,12 +8,20 @@ function fmtUptime(s) {
     return dayjs.duration(s, 'seconds').humanize();
 }
 
+function stripLogPrefix(s) {
+    return s.replace(/^\s*(?:\[[^\]]*\]\s*:?\s*)?(?:[A-Z]{4,8}\s*:\s+)?/, '');
+}
+
 // a line reporting the service starting or stopping is picked out from the ordinary lines
 function stateClass(msg) {
-    const s = String(msg ?? '');
-    if (/^(Started|Starting)\b/.test(s) || /\bDone \(/.test(s)) return 'log-green log-state';
-    if (/^(Stopped|Stopping)\b/.test(s)
-        || /\b(Deactivated successfully|Main process exited|Failed with result|Stopping server)\b/.test(s)) return 'log-red log-state';
+    const s = stripLogPrefix(String(msg ?? ''));
+
+    if (/\bSession \d+ of User\b/.test(s) || /^session-\d+\.scope\b/.test(s)) return '';
+
+    if (/^(Started|Starting)\b/.test(s)
+        || /\b(Done \(|Application startup complete)/.test(s)) return 'log-green log-state';
+    if (/^(Stopped|Stopping|Shutting down|Finished server process)\b/.test(s)
+        || /\b(Deactivated successfully|Main process exited|Failed with result|Stopping server|Application shutdown complete)\b/.test(s)) return 'log-red log-state';
     return '';
 }
 
