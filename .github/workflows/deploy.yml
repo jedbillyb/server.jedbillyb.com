@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [v2]
+    branches: [v3]
 
 jobs:
   deploy:
@@ -20,8 +20,8 @@ jobs:
           script: |
             set -e
             cd /home/ubuntu/server.jedbillyb.com
-            git fetch origin v2
-            git reset --hard origin/v2
+            git fetch origin v3
+            git reset --hard origin/v3
             if [ ! -f api/.env ] && [ -f /home/ubuntu/server-api/.env ]; then
               cp /home/ubuntu/server-api/.env api/.env
             fi
