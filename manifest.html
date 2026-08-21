@@ -168,6 +168,8 @@ lucide.createIcons();
 // where all the live data comes from, the server's Api
 const API = 'https://server.jedbillyb.com/api';
 
+let serviceRows = 8;
+
 // logic of the cpu and ram graph. cpu is green on the left, ram is orange on the right,
 // each with its own scale so both lines stay readable
 const usageChart = new Chart(document.getElementById('usage-chart'), {
@@ -277,6 +279,7 @@ function apply(snap) {
         // build one table row per project, with a green or grey dot next to it
         const serviceMap = Object.fromEntries(allServices.map(s => [s.unit, s]));
         const tracked = projects.filter(p => p.service);
+        serviceRows = tracked.length;
         const keyServices = tracked.map(p => {
             const s = serviceMap[p.service] ?? {};
             const up = s.active === 'active';
@@ -299,10 +302,10 @@ function apply(snap) {
         document.querySelector('.status-banner').className = down > 0 ? 'status-banner warn' : 'status-banner';
     }
 
-    // the 8 busiest processes
+    // the busiest processes
     if (snap.processes) {
         const procs = snap.processes;
-        document.getElementById('procs-body').innerHTML = procs.slice(0,8).map(p => {
+        document.getElementById('procs-body').innerHTML = procs.slice(0, serviceRows).map(p => {
             // commands come through as a long path, so pull out just the program name
             const tokens = (p.command ?? '').split(/\s+/).filter(Boolean);
             const name = tokens.map(t => t.split('/').pop()).find(t => t && !t.startsWith('-') && !/^\d+$/.test(t) && t !== '--') ?? tokens[0]?.split('/').pop() ?? '—';
@@ -332,7 +335,7 @@ function apply(snap) {
 // starts everything once the page loads. the connection to the server is then opened, updating every 2 seconds
 document.getElementById('map-region').textContent = 'silverwater, nsw';
 loadLocation();
-const stream = liveStream(`${API}/stream?system=1&services=1&projects=1&processes=8&docker=1&interval=2000`, apply);
+const stream = liveStream(`${API}/stream?system=1&services=1&projects=1&processes=12&docker=1&interval=2000`, apply);
 </script>
 </body>
 
